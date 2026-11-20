@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>陶朱雪球大戰 — 旗艦主臥名床 & 1:1 展示間超跑 3D 試玩版</title>
+  <title>陶朱雪球大戰 — App Store 上架旗艦版 3D</title>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <style>
@@ -158,8 +158,8 @@
       </div>
     </div>
 
-    <!-- TOP HUD: Dynamic Island + Dual Clamped Health Bars + Top-Right Music Button -->
-    <div class="absolute top-0 left-0 right-0 z-20 pt-2.5 px-3 pointer-events-none flex flex-col gap-1.5">
+    <!-- TOP HUD: Dynamic Island Safe Area + Dual Clamped Health Bars + Top-Right Music Button -->
+    <div class="absolute top-0 left-0 right-0 z-20 px-3 pointer-events-none flex flex-col gap-1.5" style="padding-top: max(0.65rem, env(safe-area-inset-top));">
       <!-- Row 1: Stage Pill + Music Button on Top Right -->
       <div class="flex items-center justify-between gap-1.5 w-full">
         <!-- Stage & Venue Badge -->
@@ -193,7 +193,7 @@
           <div class="flex items-center justify-between gap-1 mb-1 overflow-hidden">
             <div class="flex items-center gap-1 min-w-0 overflow-hidden">
               <span class="w-2 h-2 rounded-full bg-sky-400 shrink-0"></span>
-              <span class="text-[10px] font-black text-sky-100 tracking-wide truncate">玩家 (YOU)</span>
+              <span id="player-hud-title" class="text-[10px] font-black text-sky-100 tracking-wide truncate">阿軒 (你)</span>
             </div>
             <div id="player-hearts-row" class="flex items-center gap-0.5 text-[9px] leading-none shrink-0"></div>
           </div>
@@ -225,8 +225,8 @@
       </div>
     </div>
 
-    <!-- BOTTOM TOUCH CONTROLS (Left Virtual Thumbstick + Right Charge & Throw Trigger) -->
-    <div id="touch-controls-hud" class="absolute bottom-0 left-0 right-0 z-20 pb-5 pt-2 px-4 pointer-events-none flex flex-col gap-2">
+    <!-- BOTTOM TOUCH CONTROLS (Left Virtual Thumbstick + Right Charge & Throw Trigger w/ Safe Area) -->
+    <div id="touch-controls-hud" class="absolute bottom-0 left-0 right-0 z-20 pt-2 px-4 pointer-events-none flex flex-col gap-2" style="padding-bottom: max(1.25rem, env(safe-area-inset-bottom));">
       <!-- Power Charge Bar -->
       <div id="charge-meter-wrap" class="mx-auto w-56 glass-hud rounded-full p-1 border border-white/20 opacity-0 transition-opacity duration-150 overflow-hidden">
         <div class="flex justify-between items-center px-2 mb-0.5">
@@ -264,7 +264,10 @@
         <!-- Right Throw Trigger Button -->
         <div class="flex flex-col items-center gap-1 pointer-events-auto">
           <button id="throw-btn" type="button" class="relative w-28 h-28 rounded-full bg-gradient-to-br from-sky-400 via-blue-600 to-indigo-900 border-4 border-amber-200/80 shadow-[0_0_38px_rgba(56,189,248,0.6),inset_0_2px_12px_rgba(255,255,255,0.35)] active:scale-95 transition-transform flex flex-col items-center justify-center overflow-hidden">
-            <div class="absolute inset-1.5 rounded-full border border-white/30 pointer-events-none"></div>
+            <svg viewBox="0 0 100 100" class="absolute inset-0 w-full h-full -rotate-90 pointer-events-none">
+              <circle cx="50" cy="50" r="46" fill="none" stroke="rgba(255,255,255,0.18)" stroke-width="5"/>
+              <circle id="throw-charge-ring" cx="50" cy="50" r="46" fill="none" stroke="#facc15" stroke-width="5.5" stroke-linecap="round" stroke-dasharray="289" stroke-dashoffset="289" style="transition: stroke-dashoffset 0.04s linear;"/>
+            </svg>
             <span id="throw-weapon-icon" class="text-3xl leading-none drop-shadow flex items-center justify-center w-10 h-10">❄️</span>
             <span id="throw-weapon-title" class="text-base font-black text-white tracking-widest mt-1 drop-shadow">丟躑</span>
           </button>
@@ -334,7 +337,7 @@
           </div>
 
           <div class="p-3 rounded-2xl bg-white/5 border border-white/10">
-            <div class="font-black text-emerald-300 mb-1">⚾ 四大投擲武器自由切換</div>
+            <div class="font-black text-emerald-300 mb-1">🪵 四大投擲武器自由切換</div>
             <ul class="space-y-1 text-[11px] text-slate-300">
               <li>• <b>❄️ 寒霜雪球</b>：飛行速度最快、拋物線平直精準（命中扣 1 滴血）。</li>
               <li>• <b>🪵 楓木棒球棒</b>：原木底頭與黑色螺旋纏帶棒身，迴旋大判定範圍（命中扣 1 滴血）。</li>
@@ -552,7 +555,8 @@
         shortName: '雪球',
         emoji: '❄️',
         damage: 1,
-        baseSpeed: 20.5,
+        cooldownSec: 0.38,
+        baseSpeed: 21.5,
         maxBoost: 11.5,
         gravity: 15.8,
         arcLift: 3.6,
@@ -572,7 +576,8 @@
         maxBoost: 10.5,
         gravity: 16.8,
         arcLift: 4.1,
-        hitRadius: 0.68,
+        cooldownSec: 0.50,
+        hitRadius: 0.72,
         canBreakAntiqueMinCharge: 0.25,
         spinSpeed: new THREE.Vector3(16.0, 2.5, 4.0),
         colorHex: 0xdeb075
@@ -587,7 +592,9 @@
         maxBoost: 9.8,
         gravity: 19.5,
         arcLift: 4.5,
-        hitRadius: 0.58,
+        cooldownSec: 0.62,
+        groundRoll: true,
+        hitRadius: 0.60,
         canBreakAntiqueMinCharge: 0.0,
         spinSpeed: new THREE.Vector3(9.5, 1.5, 0),
         colorHex: 0x1e293b
@@ -602,7 +609,9 @@
         maxBoost: 10.0,
         gravity: 18.8,
         arcLift: 4.3,
-        hitRadius: 0.55,
+        cooldownSec: 0.56,
+        highBounce: true,
+        hitRadius: 0.56,
         canBreakAntiqueMinCharge: 0.1,
         spinSpeed: new THREE.Vector3(11.0, 8.5, 6.0),
         colorHex: 0xb91c1c
@@ -1102,11 +1111,33 @@
       '休想闖過陶朱隱園！'
     ];
 
+    // 2B. 12 ORIGINAL MALE & FEMALE CHARACTERS (6 Male + 6 Female — Randomly Cast Every Stage!)
+    const CHARACTER_ROSTER = [
+      // 6 Male Characters
+      { id: 'axuan',  name: '阿軒', gender: 'M', skinHex: 0xf7cdb0, hairStyle: 'male_parted',   hairHex: '#3d281a', teeBase: '#f4efe6', motif: 'shiba',      pantsHex: 0x1b2a47, bottomStyle: 'joggers', wristHex: 0x4b7496, shoeHex: 0x0284c7 },
+      { id: 'kevin',  name: '凱文', gender: 'M', skinHex: 0xf2c2a2, hairStyle: 'male_textured', hairHex: '#1e2128', teeBase: '#23262d', motif: 'cool_cat',   pantsHex: 0x1f2228, bottomStyle: 'joggers', wristHex: 0xd97736, shoeHex: 0xdc2626 },
+      { id: 'zihao',  name: '子豪', gender: 'M', skinHex: 0xedc09e, hairStyle: 'male_wavy',     hairHex: '#5a4636', teeBase: '#dfe7df', motif: 'bauhaus',    pantsHex: 0x263238, bottomStyle: 'shorts',  wristHex: 0x3b82f6, shoeHex: 0x0f766e },
+      { id: 'yusen',  name: '宇森', gender: 'M', skinHex: 0xf5caa8, hairStyle: 'male_parted',   hairHex: '#2b2420', teeBase: '#d8e2ec', motif: 'corgi',      pantsHex: 0x1e293b, bottomStyle: 'joggers', wristHex: 0xea580c, shoeHex: 0x1d4ed8 },
+      { id: 'bohan',  name: '柏翰', gender: 'M', skinHex: 0xe8b896, hairStyle: 'male_textured', hairHex: '#6b4f3a', teeBase: '#ece4d8', motif: 'memphis',    pantsHex: 0x2d2a26, bottomStyle: 'shorts',  wristHex: 0x10b981, shoeHex: 0xb45309 },
+      { id: 'youchen',name: '佑辰', gender: 'M', skinHex: 0xf6ccb0, hairStyle: 'male_wavy',     hairHex: '#1c1f26', teeBase: '#e2e4e8', motif: 'orange_cat', pantsHex: 0x1e293b, bottomStyle: 'joggers', wristHex: 0xf59e0b, shoeHex: 0x334155 },
+      // 6 Female Characters
+      { id: 'xiaoqing',name:'小晴', gender: 'F', skinHex: 0xfbe0cc, hairStyle: 'female_ponytail',hairHex: '#4a3022', teeBase: '#f7ecee', motif: 'corgi',      pantsHex: 0x24344d, bottomStyle: 'skort',   wristHex: 0xec4899, shoeHex: 0xf43f5e },
+      { id: 'yunxi',  name: '昀希', gender: 'F', skinHex: 0xfad8c0, hairStyle: 'female_bob',     hairHex: '#222024', teeBase: '#f4efe6', motif: 'cool_cat',   pantsHex: 0x1f2937, bottomStyle: 'joggers', wristHex: 0x8b5cf6, shoeHex: 0x6366f1 },
+      { id: 'ruoning',name: '若寧', gender: 'F', skinHex: 0xf8d4ba, hairStyle: 'female_buns',    hairHex: '#7a5840', teeBase: '#dfe8e2', motif: 'shiba',      pantsHex: 0x2c3539, bottomStyle: 'shorts',  wristHex: 0x14b8a6, shoeHex: 0x0d9488 },
+      { id: 'caiwei', name: '采薇', gender: 'F', skinHex: 0xfce1ce, hairStyle: 'female_long',    hairHex: '#5c382c', teeBase: '#efe5d8', motif: 'orange_cat', pantsHex: 0x332b28, bottomStyle: 'skort',   wristHex: 0xd97706, shoeHex: 0xe11d48 },
+      { id: 'xinyan', name: '心妍', gender: 'F', skinHex: 0xf7d2b8, hairStyle: 'female_ponytail',hairHex: '#1f222a', teeBase: '#dce6f0', motif: 'bauhaus',    pantsHex: 0x1e293b, bottomStyle: 'joggers', wristHex: 0x0284c7, shoeHex: 0x2563eb },
+      { id: 'yutong', name: '語彤', gender: 'F', skinHex: 0xfadac2, hairStyle: 'female_bob',     hairHex: '#634335', teeBase: '#282b33', motif: 'memphis',    pantsHex: 0x18181b, bottomStyle: 'skort',   wristHex: 0xf43f5e, shoeHex: 0xd97706 }
+    ];
+
     // 3. GLOBAL GAME STATE
     const state = {
       phase: 'HOME', // HOME | WEAPON_SELECT | PLAYING | RESULT
       stageOrder: [], // Randomized 20 stages
       stageIdx: 0,    // 0 .. 19
+      playerChar: null,
+      enemyChar: null,
+      prevPlayerCharId: null,
+      prevEnemyCharId: null,
       selectedWeaponId: 'snowball',
       bgmEnabled: true,
 
@@ -1147,12 +1178,22 @@
       },
 
       joy: { active: false, id: null, dx: 0, dy: 0 },
+      throwPtr: { active: false, id: null },
       keys: { w: false, a: false, s: false, d: false, space: false },
 
+      // App Store Juice, Transitions & Combat Polish
+      isTransitioning: false,
+      hitStopTimer: 0,
+      camShake: 0,
+      introTimer: 0,
+      playerCombo: 0,
+      playerHitRecoil: 0,
+      enemyHitRecoil: 0,
+
       projectiles: [],
-      obstacles: [], // { type: 'eave' | 'antique', mesh, aabb, intact, hp, kind, label }
+      obstacles: [],
       particles: [],
-      reactingProps: [], // Active TOPPLE / ROLL / BOUNCE animated props
+      reactingProps: [],
 
       stats: {
         hits: 0,
@@ -1797,15 +1838,349 @@
         rg.addColorStop(1, 'rgba(0, 0, 0, 0.0)');
         ctx.fillStyle = rg;
         ctx.fillRect(0, 0, 512, 512);
+      } else if (type === 'graphic_tee_player' || type === 'graphic_tee_enemy') {
+        // Dedicated 1024x512 high-res cotton knit canvas (u=0.25 Back view, u=0.75 Front view — crisp on BOTH sides, ZERO stripes!)
+        canvas.width = 1024;
+        canvas.height = 512;
+        const isP = type === 'graphic_tee_player';
+        ctx.fillStyle = isP ? '#f4efe6' : '#23262d';
+        ctx.fillRect(0, 0, 1024, 512);
+
+        // Soft tactile cotton jersey knit micro-texture
+        ctx.fillStyle = isP ? 'rgba(130, 120, 108, 0.08)' : 'rgba(255, 255, 255, 0.045)';
+        for (let y = 0; y < 512; y += 5) {
+          for (let x = 0; x < 1024; x += 5) {
+            if ((x + y) % 10 === 0) ctx.fillRect(x, y, 2, 2);
+          }
+        }
+
+        // Helper to draw Modern Geometric Shapes + Cute Dog (Player) or Cool Cat (Opponent) centered at (cx, cy)
+        function drawGraphicPrint(cx, cy, scale) {
+          ctx.save();
+          ctx.translate(cx, cy);
+          ctx.scale(scale, scale);
+
+          if (isP) {
+            // --- PLAYER: Modern Geometric Bauhaus Shapes + Cute Shiba/Corgi Dog Illustration ---
+            // Dusty-blue semicircle backdrop
+            ctx.fillStyle = '#6088ab';
+            ctx.beginPath(); ctx.arc(-42, 18, 72, Math.PI * 0.5, Math.PI * 1.5); ctx.closePath(); ctx.fill();
+            // Warm terracotta triangle
+            ctx.fillStyle = '#d97a54';
+            ctx.beginPath(); ctx.moveTo(28, -88); ctx.lineTo(108, -28); ctx.lineTo(44, 18); ctx.closePath(); ctx.fill();
+            // Mustard-gold geometric diamond
+            ctx.fillStyle = '#e5ae49';
+            ctx.beginPath(); ctx.moveTo(78, 30); ctx.lineTo(106, 58); ctx.lineTo(78, 86); ctx.lineTo(50, 58); ctx.closePath(); ctx.fill();
+            // Sage-green playful accent dots
+            ctx.fillStyle = '#739e86';
+            [[-94, -56, 13], [-74, 82, 10], [92, -68, 9]].forEach(([dx, dy, dr]) => {
+              ctx.beginPath(); ctx.arc(dx, dy, dr, 0, Math.PI * 2); ctx.fill();
+            });
+
+            // Adorable Shiba Inu / Corgi Dog Head
+            // Perky triangular ears
+            ctx.fillStyle = '#d89143';
+            ctx.beginPath(); ctx.moveTo(-58, -18); ctx.lineTo(-76, -86); ctx.lineTo(-14, -52); ctx.closePath(); ctx.fill();
+            ctx.beginPath(); ctx.moveTo(58, -18); ctx.lineTo(76, -86); ctx.lineTo(14, -52); ctx.closePath(); ctx.fill();
+            // Soft pink inner ears
+            ctx.fillStyle = '#f5b5b0';
+            ctx.beginPath(); ctx.moveTo(-52, -26); ctx.lineTo(-64, -68); ctx.lineTo(-26, -46); ctx.closePath(); ctx.fill();
+            ctx.beginPath(); ctx.moveTo(52, -26); ctx.lineTo(64, -68); ctx.lineTo(26, -46); ctx.closePath(); ctx.fill();
+            // Fluffy rounded honey-gold face
+            ctx.fillStyle = '#e39e4f';
+            ctx.beginPath(); ctx.ellipse(0, 4, 68, 56, 0, 0, Math.PI * 2); ctx.fill();
+            // Cream Shiba cheeks & muzzle mask
+            ctx.fillStyle = '#fffaf0';
+            ctx.beginPath(); ctx.ellipse(0, 24, 54, 35, 0, 0, Math.PI * 2); ctx.fill();
+            // Cute cream eyebrows
+            ctx.beginPath(); ctx.ellipse(-24, -22, 10, 6, -0.2, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.ellipse(24, -22, 10, 6, 0.2, 0, Math.PI * 2); ctx.fill();
+            // Rosy blush
+            ctx.fillStyle = 'rgba(244, 114, 132, 0.45)';
+            ctx.beginPath(); ctx.ellipse(-40, 18, 12, 7, 0, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.ellipse(40, 18, 12, 7, 0, 0, Math.PI * 2); ctx.fill();
+            // Glossy eyes
+            ctx.fillStyle = '#1c1917';
+            ctx.beginPath(); ctx.arc(-25, 0, 8.5, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.arc(25, 0, 8.5, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath(); ctx.arc(-28, -3, 3, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.arc(22, -3, 3, 0, Math.PI * 2); ctx.fill();
+            // Cute dog nose & happy W-smile
+            ctx.fillStyle = '#1c1917';
+            ctx.beginPath(); ctx.ellipse(0, 16, 10, 7, 0, 0, Math.PI * 2); ctx.fill();
+            ctx.strokeStyle = '#1c1917'; ctx.lineWidth = 4.5; ctx.lineCap = 'round';
+            ctx.beginPath(); ctx.arc(-9, 26, 9, 0.1 * Math.PI, 0.95 * Math.PI); ctx.stroke();
+            ctx.beginPath(); ctx.arc(9, 26, 9, 0.05 * Math.PI, 0.9 * Math.PI); ctx.stroke();
+          } else {
+            // --- OPPONENT: Modern Geometric Shapes + Cool-Cute Cat Illustration ---
+            // Warm amber semicircle
+            ctx.fillStyle = '#e08a3c';
+            ctx.beginPath(); ctx.arc(44, 14, 70, -Math.PI * 0.5, Math.PI * 0.5); ctx.closePath(); ctx.fill();
+            // Sky-blue geometric diamond
+            ctx.fillStyle = '#38bdf8';
+            ctx.beginPath(); ctx.moveTo(-78, -62); ctx.lineTo(-46, -30); ctx.lineTo(-78, 2); ctx.lineTo(-110, -30); ctx.closePath(); ctx.fill();
+            // Cream geometric triangle
+            ctx.fillStyle = '#f5efe6';
+            ctx.beginPath(); ctx.moveTo(-90, 42); ctx.lineTo(-34, 92); ctx.lineTo(-98, 92); ctx.closePath(); ctx.fill();
+            // Coral dots
+            ctx.fillStyle = '#f43f5e';
+            [[88, -68, 12], [96, 74, 9], [-56, -86, 8]].forEach(([dx, dy, dr]) => {
+              ctx.beginPath(); ctx.arc(dx, dy, dr, 0, Math.PI * 2); ctx.fill();
+            });
+
+            // Cool-Cute Cat Head
+            ctx.fillStyle = '#f6efe4';
+            // Pointed cat ears
+            ctx.beginPath(); ctx.moveTo(-58, -14); ctx.lineTo(-72, -88); ctx.lineTo(-10, -48); ctx.closePath(); ctx.fill();
+            ctx.beginPath(); ctx.moveTo(58, -14); ctx.lineTo(72, -88); ctx.lineTo(10, -48); ctx.closePath(); ctx.fill();
+            // Coral-pink inner ears
+            ctx.fillStyle = '#fb7185';
+            ctx.beginPath(); ctx.moveTo(-50, -24); ctx.lineTo(-60, -68); ctx.lineTo(-22, -44); ctx.closePath(); ctx.fill();
+            ctx.beginPath(); ctx.moveTo(50, -24); ctx.lineTo(60, -68); ctx.lineTo(22, -44); ctx.closePath(); ctx.fill();
+            // Sleek rounded cat face
+            ctx.fillStyle = '#f6efe4';
+            ctx.beginPath(); ctx.ellipse(0, 8, 66, 54, 0, 0, Math.PI * 2); ctx.fill();
+            // Cute forehead tabby diamond patch
+            ctx.fillStyle = '#e08a3c';
+            ctx.beginPath(); ctx.moveTo(0, -46); ctx.lineTo(14, -22); ctx.lineTo(0, -14); ctx.lineTo(-14, -22); ctx.closePath(); ctx.fill();
+            // Bright expressive cat eyes
+            ctx.fillStyle = '#0f172a';
+            ctx.beginPath(); ctx.ellipse(-25, 2, 10, 12, 0, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.ellipse(25, 2, 10, 12, 0, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = '#38bdf8';
+            ctx.beginPath(); ctx.arc(-25, 0, 5, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.arc(25, 0, 5, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath(); ctx.arc(-28, -4, 3, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.arc(22, -4, 3, 0, Math.PI * 2); ctx.fill();
+            // Cute pink triangle nose + cat smile + crisp whiskers
+            ctx.fillStyle = '#f43f5e';
+            ctx.beginPath(); ctx.moveTo(-8, 16); ctx.lineTo(8, 16); ctx.lineTo(0, 24); ctx.closePath(); ctx.fill();
+            ctx.strokeStyle = '#1c1917'; ctx.lineWidth = 4; ctx.lineCap = 'round';
+            ctx.beginPath(); ctx.arc(-8, 28, 8, 0.1 * Math.PI, 0.95 * Math.PI); ctx.stroke();
+            ctx.beginPath(); ctx.arc(8, 28, 8, 0.05 * Math.PI, 0.9 * Math.PI); ctx.stroke();
+            // Cat whiskers
+            ctx.strokeStyle = '#64748b'; ctx.lineWidth = 3.2;
+            [[-46, 12, -88, 6], [-46, 22, -88, 24], [46, 12, 88, 6], [46, 22, 88, 24]].forEach(([x1,y1,x2,y2]) => {
+              ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+            });
+          }
+          ctx.restore();
+        }
+
+        // Draw crisp graphic print on BOTH Back (x=256, player rear view!) AND Front (x=768, opponent front view!)
+        drawGraphicPrint(256, 252, 1.08);
+        drawGraphicPrint(768, 252, 1.08);
+      } else if (type === 'hair_chestnut' || type === 'hair_charcoal') {
+        const isChestnut = type === 'hair_chestnut';
+        ctx.fillStyle = isChestnut ? '#3d281a' : '#1e2128';
+        ctx.fillRect(0, 0, 512, 512);
+        // Fine soft vertical hair strands + gentle satin sheen band
+        for (let x = 0; x < 512; x += 3) {
+          ctx.fillStyle = (x % 6 === 0)
+            ? (isChestnut ? 'rgba(115, 78, 52, 0.28)' : 'rgba(72, 78, 92, 0.28)')
+            : (isChestnut ? 'rgba(32, 18, 10, 0.22)' : 'rgba(12, 14, 18, 0.22)');
+          ctx.fillRect(x, 0, 2, 512);
+        }
+        // Subtle natural top satin highlight halo
+        const sheen = ctx.createLinearGradient(0, 120, 0, 260);
+        sheen.addColorStop(0, 'rgba(255,255,255,0)');
+        sheen.addColorStop(0.5, isChestnut ? 'rgba(210,165,125,0.16)' : 'rgba(165,178,200,0.14)');
+        sheen.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.fillStyle = sheen;
+        ctx.fillRect(0, 120, 512, 140);
       }
 
       const tex = new THREE.CanvasTexture(canvas);
       tex.wrapS = THREE.RepeatWrapping;
       tex.wrapT = THREE.RepeatWrapping;
-      if (type !== 'helipad' && type !== 'maple_bat_barrel' && type !== 'black_grip_tape') {
+      if (type !== 'helipad' && type !== 'maple_bat_barrel' && type !== 'black_grip_tape' && !type.startsWith('graphic_tee_') && !type.startsWith('hair_') && type !== 'contact_shadow') {
         tex.repeat.set(4, 6);
       }
       texCache[type] = tex;
+      return tex;
+    }
+
+    // Dynamic High-Res 1024x512 ZERO-STRIPE Cotton Graphic T-Shirt Generator (6 Original Motifs, Front & Back)
+    function getDynamicGraphicTeeTexture(baseHex, motif) {
+      const key = `dyn_tee_${baseHex}_${motif}`;
+      if (texCache[key]) return texCache[key];
+
+      const canvas = document.createElement('canvas');
+      canvas.width = 1024;
+      canvas.height = 512;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = baseHex;
+      ctx.fillRect(0, 0, 1024, 512);
+
+      const isDark = baseHex === '#23262d' || baseHex === '#282b33';
+      ctx.fillStyle = isDark ? 'rgba(255,255,255,0.045)' : 'rgba(120,110,100,0.08)';
+      for (let y = 0; y < 512; y += 5) {
+        for (let x = 0; x < 1024; x += 5) {
+          if ((x + y) % 10 === 0) ctx.fillRect(x, y, 2, 2);
+        }
+      }
+
+      function drawMotif(cx, cy, sc) {
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.scale(sc, sc);
+
+        if (motif === 'shiba' || motif === 'corgi') {
+          const isCorgi = motif === 'corgi';
+          ctx.fillStyle = isCorgi ? '#e89b72' : '#6088ab';
+          ctx.beginPath(); ctx.arc(-42, 18, 70, Math.PI * 0.5, Math.PI * 1.5); ctx.closePath(); ctx.fill();
+          ctx.fillStyle = isCorgi ? '#5c9ead' : '#d97a54';
+          ctx.beginPath(); ctx.moveTo(28, -86); ctx.lineTo(106, -26); ctx.lineTo(44, 18); ctx.closePath(); ctx.fill();
+          ctx.fillStyle = '#e5ae49';
+          ctx.beginPath(); ctx.moveTo(78, 30); ctx.lineTo(106, 58); ctx.lineTo(78, 86); ctx.lineTo(50, 58); ctx.closePath(); ctx.fill();
+          ctx.fillStyle = '#739e86';
+          [[-92, -54, 12], [-72, 80, 9], [90, -66, 8]].forEach(([dx, dy, dr]) => {
+            ctx.beginPath(); ctx.arc(dx, dy, dr, 0, Math.PI * 2); ctx.fill();
+          });
+
+          const fur = isCorgi ? '#e08938' : '#d89143';
+          // Ears (Corgi has bigger rounder perky ears!)
+          ctx.fillStyle = fur;
+          if (isCorgi) {
+            ctx.beginPath(); ctx.ellipse(-52, -58, 22, 40, -0.35, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.ellipse(52, -58, 22, 40, 0.35, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = '#f8b4b4';
+            ctx.beginPath(); ctx.ellipse(-50, -56, 12, 26, -0.35, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.ellipse(50, -56, 12, 26, 0.35, 0, Math.PI * 2); ctx.fill();
+          } else {
+            ctx.beginPath(); ctx.moveTo(-58, -18); ctx.lineTo(-76, -86); ctx.lineTo(-14, -52); ctx.closePath(); ctx.fill();
+            ctx.beginPath(); ctx.moveTo(58, -18); ctx.lineTo(76, -86); ctx.lineTo(14, -52); ctx.closePath(); ctx.fill();
+            ctx.fillStyle = '#f5b5b0';
+            ctx.beginPath(); ctx.moveTo(-52, -26); ctx.lineTo(-64, -68); ctx.lineTo(-26, -46); ctx.closePath(); ctx.fill();
+            ctx.beginPath(); ctx.moveTo(52, -26); ctx.lineTo(64, -68); ctx.lineTo(26, -46); ctx.closePath(); ctx.fill();
+          }
+          ctx.fillStyle = fur;
+          ctx.beginPath(); ctx.ellipse(0, 6, 68, 56, 0, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#fffaf0';
+          ctx.beginPath(); ctx.ellipse(0, 26, 54, 34, 0, 0, Math.PI * 2); ctx.fill();
+          if (isCorgi) {
+            ctx.beginPath(); ctx.ellipse(0, -18, 13, 30, 0, 0, Math.PI * 2); ctx.fill();
+          } else {
+            ctx.beginPath(); ctx.ellipse(-24, -22, 10, 6, -0.2, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.ellipse(24, -22, 10, 6, 0.2, 0, Math.PI * 2); ctx.fill();
+          }
+          ctx.fillStyle = 'rgba(244, 114, 132, 0.45)';
+          ctx.beginPath(); ctx.ellipse(-40, 18, 12, 7, 0, 0, Math.PI * 2); ctx.fill();
+          ctx.beginPath(); ctx.ellipse(40, 18, 12, 7, 0, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#1c1917';
+          ctx.beginPath(); ctx.arc(-25, 0, 8.5, 0, Math.PI * 2); ctx.fill();
+          ctx.beginPath(); ctx.arc(25, 0, 8.5, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#ffffff';
+          ctx.beginPath(); ctx.arc(-28, -3, 3, 0, Math.PI * 2); ctx.fill();
+          ctx.beginPath(); ctx.arc(22, -3, 3, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#1c1917';
+          ctx.beginPath(); ctx.ellipse(0, 16, 10, 7, 0, 0, Math.PI * 2); ctx.fill();
+          ctx.strokeStyle = '#1c1917'; ctx.lineWidth = 4.5; ctx.lineCap = 'round';
+          ctx.beginPath(); ctx.arc(-9, 26, 9, 0.1 * Math.PI, 0.95 * Math.PI); ctx.stroke();
+          ctx.beginPath(); ctx.arc(9, 26, 9, 0.05 * Math.PI, 0.9 * Math.PI); ctx.stroke();
+        } else if (motif === 'cool_cat' || motif === 'orange_cat') {
+          const isOrange = motif === 'orange_cat';
+          ctx.fillStyle = isOrange ? '#38bdf8' : '#e08a3c';
+          ctx.beginPath(); ctx.arc(44, 14, 68, -Math.PI * 0.5, Math.PI * 0.5); ctx.closePath(); ctx.fill();
+          ctx.fillStyle = isOrange ? '#f43f5e' : '#38bdf8';
+          ctx.beginPath(); ctx.moveTo(-78, -62); ctx.lineTo(-46, -30); ctx.lineTo(-78, 2); ctx.lineTo(-110, -30); ctx.closePath(); ctx.fill();
+          ctx.fillStyle = isDark ? '#f5efe6' : '#334155';
+          ctx.beginPath(); ctx.moveTo(-90, 42); ctx.lineTo(-34, 92); ctx.lineTo(-98, 92); ctx.closePath(); ctx.fill();
+
+          const catFur = isOrange ? '#f59e0b' : (isDark ? '#f6efe4' : '#27272a');
+          ctx.fillStyle = catFur;
+          ctx.beginPath(); ctx.moveTo(-58, -14); ctx.lineTo(-72, -88); ctx.lineTo(-10, -48); ctx.closePath(); ctx.fill();
+          ctx.beginPath(); ctx.moveTo(58, -14); ctx.lineTo(72, -88); ctx.lineTo(10, -48); ctx.closePath(); ctx.fill();
+          ctx.fillStyle = '#fb7185';
+          ctx.beginPath(); ctx.moveTo(-50, -24); ctx.lineTo(-60, -68); ctx.lineTo(-22, -44); ctx.closePath(); ctx.fill();
+          ctx.beginPath(); ctx.moveTo(50, -24); ctx.lineTo(60, -68); ctx.lineTo(22, -44); ctx.closePath(); ctx.fill();
+          ctx.fillStyle = catFur;
+          ctx.beginPath(); ctx.ellipse(0, 8, 66, 54, 0, 0, Math.PI * 2); ctx.fill();
+          if (isOrange) {
+            ctx.fillStyle = '#fffbeb';
+            ctx.beginPath(); ctx.ellipse(0, 26, 46, 28, 0, 0, Math.PI * 2); ctx.fill();
+          }
+          ctx.fillStyle = isOrange ? '#1c1917' : '#facc15';
+          ctx.beginPath(); ctx.ellipse(-25, 2, 10, 12, 0, 0, Math.PI * 2); ctx.fill();
+          ctx.beginPath(); ctx.ellipse(25, 2, 10, 12, 0, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#ffffff';
+          ctx.beginPath(); ctx.arc(-28, -3, 3.5, 0, Math.PI * 2); ctx.fill();
+          ctx.beginPath(); ctx.arc(22, -3, 3.5, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#f43f5e';
+          ctx.beginPath(); ctx.moveTo(-8, 16); ctx.lineTo(8, 16); ctx.lineTo(0, 24); ctx.closePath(); ctx.fill();
+          ctx.strokeStyle = isDark && !isOrange ? '#1c1917' : '#f8fafc';
+          if (isOrange || isDark) ctx.strokeStyle = '#1c1917';
+          ctx.lineWidth = 4; ctx.lineCap = 'round';
+          ctx.beginPath(); ctx.arc(-8, 28, 8, 0.1 * Math.PI, 0.95 * Math.PI); ctx.stroke();
+          ctx.beginPath(); ctx.arc(8, 28, 8, 0.05 * Math.PI, 0.9 * Math.PI); ctx.stroke();
+          ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 3;
+          [[-46, 12, -88, 6], [-46, 22, -88, 24], [46, 12, 88, 6], [46, 22, 88, 24]].forEach(([x1,y1,x2,y2]) => {
+            ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+          });
+        } else if (motif === 'bauhaus') {
+          // Bold Bauhaus Geometric Art Composition (Circles, Semicircles, Triangles, Diamonds — ZERO stripes!)
+          ctx.fillStyle = '#1e3a8a';
+          ctx.beginPath(); ctx.arc(-32, -16, 62, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#d97706';
+          ctx.beginPath(); ctx.arc(46, 26, 56, -Math.PI * 0.5, Math.PI * 0.5); ctx.closePath(); ctx.fill();
+          ctx.fillStyle = '#dc2626';
+          ctx.beginPath(); ctx.moveTo(-78, 78); ctx.lineTo(8, -74); ctx.lineTo(74, 78); ctx.closePath(); ctx.fill();
+          ctx.fillStyle = '#f8fafc';
+          ctx.beginPath(); ctx.arc(-10, 24, 24, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#0f172a';
+          ctx.beginPath(); ctx.moveTo(64, -76); ctx.lineTo(94, -46); ctx.lineTo(64, -16); ctx.lineTo(34, -46); ctx.closePath(); ctx.fill();
+        } else {
+          // Memphis Abstract Geometric Art (Playful Polygons, Arcs, Floating Dots — ZERO stripes!)
+          ctx.fillStyle = '#0ea5e9';
+          ctx.beginPath(); ctx.moveTo(-88, -68); ctx.lineTo(24, -84); ctx.lineTo(-42, 48); ctx.closePath(); ctx.fill();
+          ctx.fillStyle = '#f43f5e';
+          ctx.beginPath(); ctx.arc(48, -22, 52, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#facc15';
+          ctx.beginPath(); ctx.moveTo(-24, 86); ctx.lineTo(34, 6); ctx.lineTo(92, 86); ctx.closePath(); ctx.fill();
+          ctx.strokeStyle = isDark ? '#f8fafc' : '#18181b';
+          ctx.lineWidth = 7;
+          ctx.beginPath(); ctx.arc(-28, 32, 40, Math.PI * 0.2, Math.PI * 1.4); ctx.stroke();
+          ctx.fillStyle = '#10b981';
+          [[-76, 62, 14], [78, -66, 12], [6, -68, 10]].forEach(([dx, dy, dr]) => {
+            ctx.beginPath(); ctx.arc(dx, dy, dr, 0, Math.PI * 2); ctx.fill();
+          });
+        }
+        ctx.restore();
+      }
+
+      drawMotif(256, 252, 1.08); // Back
+      drawMotif(768, 252, 1.08); // Front
+
+      const tex = new THREE.CanvasTexture(canvas);
+      tex.encoding = THREE.sRGBEncoding;
+      texCache[key] = tex;
+      return tex;
+    }
+
+    function getDynamicHairTexture(hairHex) {
+      const key = `dyn_hair_${hairHex}`;
+      if (texCache[key]) return texCache[key];
+      const canvas = document.createElement('canvas');
+      canvas.width = 512;
+      canvas.height = 512;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = hairHex;
+      ctx.fillRect(0, 0, 512, 512);
+      for (let x = 0; x < 512; x += 3) {
+        ctx.fillStyle = (x % 6 === 0) ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.18)';
+        ctx.fillRect(x, 0, 2, 512);
+      }
+      const sheen = ctx.createLinearGradient(0, 120, 0, 260);
+      sheen.addColorStop(0, 'rgba(255,255,255,0)');
+      sheen.addColorStop(0.5, 'rgba(255,245,230,0.14)');
+      sheen.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.fillStyle = sheen;
+      ctx.fillRect(0, 120, 512, 140);
+      const tex = new THREE.CanvasTexture(canvas);
+      tex.encoding = THREE.sRGBEncoding;
+      texCache[key] = tex;
       return tex;
     }
 
@@ -1880,6 +2255,7 @@
     dirLight.shadow.mapSize.width = 2048;
     dirLight.shadow.mapSize.height = 2048;
     dirLight.shadow.bias = -0.0004;
+    dirLight.shadow.normalBias = 0.025;
     dirLight.shadow.camera.near = 1;
     dirLight.shadow.camera.far = 44;
     const d = 14.5;
@@ -1913,6 +2289,33 @@
 
     const dynamicGroup = new THREE.Group();
     scene.add(dynamicGroup);
+
+    // 3D Parabolic Aim Trajectory Preview & Target Landing Ring (Subtle Gold-White Architectural Dots)
+    const aimArcGroup = new THREE.Group();
+    const AIM_DOT_COUNT = 11;
+    const aimDots = [];
+    const aimDotGeo = new THREE.SphereGeometry(0.062, 10, 10);
+    for (let i = 0; i < AIM_DOT_COUNT; i++) {
+      const m = new THREE.Mesh(
+        aimDotGeo,
+        new THREE.MeshBasicMaterial({
+          color: i > AIM_DOT_COUNT - 3 ? 0xfacc15 : 0xf8fafc,
+          transparent: true,
+          opacity: 0.72 - (i / AIM_DOT_COUNT) * 0.35
+        })
+      );
+      aimArcGroup.add(m);
+      aimDots.push(m);
+    }
+    const aimReticle = new THREE.Mesh(
+      new THREE.RingGeometry(0.28, 0.38, 24),
+      new THREE.MeshBasicMaterial({ color: 0xfacc15, side: THREE.DoubleSide, transparent: true, opacity: 0.75 })
+    );
+    aimReticle.rotation.x = -Math.PI / 2;
+    aimReticle.position.y = 0.04;
+    aimArcGroup.add(aimReticle);
+    aimArcGroup.visible = false;
+    scene.add(aimArcGroup);
 
     // Ambient Snowfall (For Outdoor Stages or Subtle Indoor Sparkle)
     const snowGeo = new THREE.BufferGeometry();
@@ -2077,139 +2480,182 @@
     }
 
     // =========================================================================
-    // 8. ARTICULATED BOMBERMAN CHARACTER BUILDER (With Single-Handed Overhead Throw)
+    // 8. ARTICULATED ATHLETIC SPORTY T-SHIRT CHARACTER BUILDER (With Rounded Hair & Overhead Throw)
     // =========================================================================
-    function createHumanCharacter({ isPlayer, coatColor }) {
+    function createHumanCharacter({ isPlayer, charDef }) {
       const root = new THREE.Group();
 
-      // Classic Bomberman Palette:
-      // Player = White Bomberman (Glossy White Helmet, Royal Blue Tunic, Gold Belt Buckle, Pink Antenna Ball / Gloves / Boots)
-      // Opponent = Black Bomberman (Obsidian Helmet, Crimson/Stage Tunic, Gold Belt Buckle, Gold-Orange Antenna Ball / Gloves / Boots)
-      const helmetMat = new THREE.MeshPhysicalMaterial({
-        color: isPlayer ? 0xffffff : 0x18181b,
-        roughness: 0.14,
-        metalness: isPlayer ? 0.06 : 0.25,
-        clearcoat: 1.0,
-        clearcoatRoughness: 0.06
-      });
-      const faceVisorMat = new THREE.MeshStandardMaterial({
-        color: isPlayer ? 0xfde2c8 : 0xfed7aa,
-        roughness: 0.45
-      });
-      const visorBorderMat = new THREE.MeshStandardMaterial({
-        color: isPlayer ? 0x334155 : 0x991b1b,
-        roughness: 0.35,
-        metalness: 0.4
-      });
-      // Plush Wool Felt Beret Materials (Player: Vibrant Scarlet-Rose Beret; Opponent: Imperial Burgundy-Obsidian Beret)
-      const beretCrownColor = isPlayer ? 0xe11d48 : 0x7f1d1d;
-      const beretMat = new THREE.MeshPhysicalMaterial({
-        color: beretCrownColor,
-        emissive: isPlayer ? 0x881337 : 0x450a0a,
-        emissiveIntensity: 0.18,
+      // Athletic Sporty Wardrobe Palette:
+      // Player: Crisp White/Cobalt Athletic T-Shirt, Navy Side-Stripe Joggers, Cobalt Wristbands & Modern Sneakers, Warm Chestnut Rounded Hair
+      // Opponent: Charcoal/Crimson Athletic T-Shirt, Black Side-Stripe Joggers, Crimson Wristbands & Modern Sneakers, Sleek Charcoal Rounded Hair
+      const isFemale = charDef.gender === 'F';
+      const skinHexStr = '#' + charDef.skinHex.toString(16).padStart(6, '0');
+      const skinMat = new THREE.MeshStandardMaterial({ color: charDef.skinHex, roughness: 0.52 });
+      const hairTex = getDynamicHairTexture(charDef.hairHex);
+      const hairMat = new THREE.MeshStandardMaterial({
+        map: hairTex,
+        bumpMap: hairTex,
+        bumpScale: 0.008,
         roughness: 0.62,
-        metalness: 0.05,
-        clearcoat: 0.22,
-        clearcoatRoughness: 0.45
+        metalness: 0.03
       });
-      const beretBandMat = new THREE.MeshStandardMaterial({
-        color: 0x0f172a,
-        roughness: 0.35,
-        metalness: 0.28
-      });
-      const coatMat = new THREE.MeshStandardMaterial({
-        color: isPlayer ? 0x1d4ed8 : coatColor,
-        roughness: 0.32,
-        metalness: 0.15
-      });
-      const limbMat = new THREE.MeshStandardMaterial({
-        color: isPlayer ? 0xf8fafc : 0x27272a,
-        roughness: 0.3,
-        metalness: 0.1
-      });
-      const gloveBootMat = new THREE.MeshPhysicalMaterial({
-        color: isPlayer ? 0xec4899 : 0xf59e0b,
-        emissive: isPlayer ? 0x9d174d : 0x92400e,
-        emissiveIntensity: 0.22,
-        roughness: 0.18,
-        metalness: 0.12,
-        clearcoat: 0.85,
-        clearcoatRoughness: 0.1
-      });
-      const beltMat = new THREE.MeshStandardMaterial({
-        color: 0x09090b,
-        roughness: 0.4,
-        metalness: 0.3
-      });
-      const goldBuckleMat = new THREE.MeshStandardMaterial({
-        color: 0xfbbf24,
-        emissive: 0xb45309,
-        emissiveIntensity: 0.25,
-        roughness: 0.18,
-        metalness: 0.88
-      });
+      const teeTex = getDynamicGraphicTeeTexture(charDef.teeBase, charDef.motif);
+      const cottonBump = getProceduralTexture('boucle_fabric');
+      const teeMat = new THREE.MeshStandardMaterial({ map: teeTex, bumpMap: cottonBump, bumpScale: 0.006, roughness: 0.82, metalness: 0.02 });
+      const sleeveMat = new THREE.MeshStandardMaterial({ color: new THREE.Color(charDef.teeBase), bumpMap: cottonBump, bumpScale: 0.005, roughness: 0.82 });
+      const collarMat = new THREE.MeshStandardMaterial({ color: new THREE.Color(charDef.teeBase).multiplyScalar(0.92), roughness: 0.84 });
+      const wristbandMat = new THREE.MeshStandardMaterial({ color: charDef.wristHex, roughness: 0.72 });
+      const joggerMat = new THREE.MeshStandardMaterial({ color: charDef.pantsHex, roughness: 0.76 });
+      const sockMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.8 });
+      const sneakerUpperMat = new THREE.MeshStandardMaterial({ color: charDef.shoeHex, roughness: 0.42 });
+      const sneakerSoleMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.35 });
+      const sneakerHeelMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.3 });
 
-      // Ground Contact Shadow Ring
-      const ringGeo = new THREE.RingGeometry(0.36, 0.48, 28);
+
+      // Ground Contact Shadow & Subtle Position Ring
+      const ringGeo = new THREE.RingGeometry(0.36, 0.46, 28);
       const ringMat = new THREE.MeshBasicMaterial({
         color: isPlayer ? 0x38bdf8 : 0xf43f5e,
         side: THREE.DoubleSide,
         transparent: true,
-        opacity: 0.75
+        opacity: 0.65
       });
       const ring = new THREE.Mesh(ringGeo, ringMat);
       ring.rotation.x = -Math.PI / 2;
       ring.position.y = 0.02;
       root.add(ring);
+      const charShadow = new THREE.Mesh(
+        new THREE.PlaneGeometry(1.05, 1.05),
+        new THREE.MeshBasicMaterial({ map: getProceduralTexture('contact_shadow'), transparent: true, opacity: 0.62, depthWrite: false })
+      );
+      charShadow.rotation.x = -Math.PI / 2;
+      charShadow.position.y = 0.014;
+      root.add(charShadow);
 
-      // Pelvis & Bomberman Battle Tunic (bodyGroup.children[0] MUST remain torso for stage coat color updates)
+      // Pelvis & Sporty Short-Sleeve T-Shirt Torso
       const bodyGroup = new THREE.Group();
       bodyGroup.position.y = 0.85;
       root.add(bodyGroup);
 
-      const torsoGeo = new THREE.CylinderGeometry(0.28, 0.25, 0.66, 20);
-      const torso = new THREE.Mesh(torsoGeo, coatMat);
-      torso.position.y = 0.26;
+      // Sculpted Anatomical Elliptical Human Torso (Natural Sloped Shoulders -> Flat Chest/Back -> Tapered Waist -> Relaxed T-Shirt Hem; ZERO Barrel Cylinder!)
+      function createSculptedTShirtTorsoGeo() {
+        const radialSegs = 36;
+        const heightSegs = 20;
+        const yMin = -0.07, yMax = 0.59;
+        const positions = [];
+        const uvs = [];
+        const indices = [];
+
+        for (let iy = 0; iy <= heightSegs; iy++) {
+          const t = iy / heightSegs; // 0 = hem, 1 = collar/neck
+          const y = yMin + t * (yMax - yMin);
+
+          // Natural human torso width (rx) vs flat chest/back depth (rz), ratio ~1.52x!
+          let rx, rz;
+          const hipRx = isFemale ? 0.244 : 0.236;
+          const waistRx = isFemale ? 0.188 : 0.220;
+          const chestRx = isFemale ? 0.242 : 0.284;
+          const chestRz = isFemale ? 0.164 : 0.178;
+          if (t < 0.18) {
+            const k = t / 0.18;
+            rx = THREE.MathUtils.lerp(hipRx, waistRx, k);
+            rz = THREE.MathUtils.lerp(0.158, 0.138, k);
+          } else if (t < 0.45) {
+            const k = (t - 0.18) / 0.27;
+            rx = THREE.MathUtils.lerp(waistRx, chestRx * 0.92, k);
+            rz = THREE.MathUtils.lerp(0.138, chestRz * 0.92, k);
+          } else if (t < 0.80) {
+            const k = (t - 0.45) / 0.35;
+            rx = THREE.MathUtils.lerp(chestRx * 0.92, chestRx, Math.sin(k * Math.PI * 0.5));
+            rz = THREE.MathUtils.lerp(chestRz * 0.92, chestRz, Math.sin(k * Math.PI * 0.5));
+          } else {
+            const k = (t - 0.80) / 0.20;
+            const sCurve = k * k * (3 - 2 * k);
+            rx = THREE.MathUtils.lerp(chestRx, 0.114, sCurve);
+            rz = THREE.MathUtils.lerp(chestRz, 0.102, sCurve);
+          }
+
+          for (let ix = 0; ix <= radialSegs; ix++) {
+            const u = ix / radialSegs; // u=0.25 -> -Z (Back), u=0.75 -> +Z (Front)
+            const angle = u * Math.PI * 2;
+            const ca = Math.cos(angle);
+            const sa = -Math.sin(angle); // u=0.25 => sa=-1 (-Z Back), u=0.75 => sa=+1 (+Z Front)
+
+            // Subtle natural chest fullness on front (+Z) & slight upper-back shoulder curve
+            const chestCurve = (sa > 0 && t > 0.45 && t < 0.82) ? 0.012 * sa * Math.sin(((t - 0.45) / 0.37) * Math.PI) : 0;
+            const px = ca * rx;
+            const pz = sa * (rz + chestCurve);
+            positions.push(px, y, pz);
+            // Flip U so graphic text/art reads left-to-right naturally on both front and back
+            uvs.push(u, t);
+          }
+        }
+
+        const stride = radialSegs + 1;
+        for (let iy = 0; iy < heightSegs; iy++) {
+          for (let ix = 0; ix < radialSegs; ix++) {
+            const a = iy * stride + ix;
+            const b = a + 1;
+            const c = (iy + 1) * stride + ix;
+            const d = c + 1;
+            indices.push(a, c, b);
+            indices.push(b, c, d);
+          }
+        }
+
+        const geo = new THREE.BufferGeometry();
+        geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+        geo.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+        geo.setIndex(indices);
+        geo.computeVertexNormals();
+        return geo;
+      }
+
+      const torsoGeo = createSculptedTShirtTorsoGeo();
+      const torso = new THREE.Mesh(torsoGeo, teeMat);
       torso.castShadow = true;
+      torso.receiveShadow = true;
       bodyGroup.add(torso);
 
-      // Bomberman Black Waist Belt + Iconic Center Gold Square Buckle
-      const beltGeo = new THREE.CylinderGeometry(0.268, 0.268, 0.13, 20);
-      const belt = new THREE.Mesh(beltGeo, beltMat);
-      belt.position.y = 0.07;
-      bodyGroup.add(belt);
+      // Soft Pelvis / Hip Bridge connecting T-shirt hem cleanly into solid joggers
+      const pelvisGeo = new THREE.SphereGeometry(0.225, 18, 12);
+      pelvisGeo.scale(1.02, 0.56, 0.68);
+      const pelvis = new THREE.Mesh(pelvisGeo, joggerMat);
+      pelvis.position.y = -0.05;
+      bodyGroup.add(pelvis);
+      if (charDef.bottomStyle === 'skort') {
+        const skortGeo = new THREE.CylinderGeometry(0.215, 0.295, 0.30, 24);
+        const skort = new THREE.Mesh(skortGeo, joggerMat);
+        skort.scale.set(1.06, 1.0, 0.78);
+        skort.position.y = -0.14;
+        skort.castShadow = true;
+        bodyGroup.add(skort);
+      }
 
-      const buckleOuter = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.16, 0.06), goldBuckleMat);
-      buckleOuter.position.set(0, 0.07, 0.255);
-      bodyGroup.add(buckleOuter);
+      // Ribbed Crew Neck Collar (Elliptical to match natural neck/collarbone)
+      const crewCollar = new THREE.Mesh(new THREE.TorusGeometry(0.118, 0.024, 10, 22), collarMat);
+      crewCollar.rotation.x = Math.PI / 2;
+      crewCollar.scale.set(1.06, 0.92, 1.0);
+      crewCollar.position.y = 0.585;
+      bodyGroup.add(crewCollar);
 
-      const buckleInner = new THREE.Mesh(new THREE.BoxGeometry(0.09, 0.08, 0.065), beltMat);
-      buckleInner.position.set(0, 0.07, 0.258);
-      bodyGroup.add(buckleInner);
+      // Natural Neck & Collarbone Transition
+      const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.076, 0.088, 0.15, 14), skinMat);
+      neck.position.y = 0.64;
+      bodyGroup.add(neck);
 
-      // Bomberman Neck Collar Ring
-      const collarGeo = new THREE.TorusGeometry(0.21, 0.048, 10, 20);
-      const collar = new THREE.Mesh(collarGeo, goldBuckleMat);
-      collar.rotation.x = Math.PI / 2;
-      collar.position.y = 0.58;
-      bodyGroup.add(collar);
-
-      // Classic Bomberman Rounded Helmet + Visor Face Window + Vertical Oval Eyes + Antenna Pom-Pom
+      // Head + Hair + Dynamic High-Res Face Expression Canvas + Cute Rounded Hair
       const headGroup = new THREE.Group();
-      headGroup.position.y = 0.84;
+      headGroup.position.y = 0.85;
       bodyGroup.add(headGroup);
 
-      // Rounded Bomberman Helmet (Slightly wider oval dome)
-      const helmetGeo = new THREE.SphereGeometry(0.265, 24, 22);
-      helmetGeo.scale(1.06, 0.96, 1.02);
-      const helmet = new THREE.Mesh(helmetGeo, helmetMat);
-      helmet.castShadow = true;
-      headGroup.add(helmet);
+      const headGeo = new THREE.SphereGeometry(0.245, 24, 22);
+      headGeo.scale(1.02, 0.98, 1.0);
+      const headMesh = new THREE.Mesh(headGeo, skinMat);
+      headMesh.castShadow = true;
+      headGroup.add(headMesh);
 
-      // Visor Frame & Recessed Face Plate on Front (+Z)
-      const visorFrame = new THREE.Mesh(new THREE.BoxGeometry(0.33, 0.20, 0.08), visorBorderMat);
-      visorFrame.position.set(0, 0.0, 0.22);
-      headGroup.add(visorFrame);
+
 
       // High-Resolution Dynamic 3D Face CanvasTexture (Supports live 😃😄😁🥹🥲😋😙😞😫😭 expressions!)
       const faceCanvas = document.createElement('canvas');
@@ -2221,11 +2667,9 @@
 
       function drawExpressionOnFace(emoji) {
         const ctx = faceCtx;
-        // Warm Bomberman face plate background
-        ctx.fillStyle = isPlayer ? '#fde2c8' : '#fed7aa';
+        ctx.fillStyle = skinHexStr;
         ctx.fillRect(0, 0, 256, 160);
 
-        // Soft cheek blush
         const blushColor = (emoji === '😫' || emoji === '😭' || emoji === '😞') ? 'rgba(147, 197, 253, 0.42)' : 'rgba(251, 113, 133, 0.42)';
         ctx.fillStyle = blushColor;
         ctx.beginPath(); ctx.ellipse(50, 108, 22, 12, 0, 0, Math.PI * 2); ctx.fill();
@@ -2237,41 +2681,29 @@
         ctx.lineJoin = 'round';
 
         if (emoji === '😄' || emoji === '😁') {
-          // Happy arched eyes ^ ^
           ctx.lineWidth = 10;
           ctx.beginPath(); ctx.arc(82, 74, 22, Math.PI * 1.12, Math.PI * 1.88); ctx.stroke();
           ctx.beginPath(); ctx.arc(174, 74, 22, Math.PI * 1.12, Math.PI * 1.88); ctx.stroke();
-          // Big grin
           ctx.fillStyle = emoji === '😁' ? '#ffffff' : '#991b1b';
-          ctx.beginPath();
-          ctx.arc(128, 96, 36, 0, Math.PI);
-          ctx.closePath();
-          ctx.fill();
-          ctx.lineWidth = 6;
-          ctx.stroke();
-          if (emoji === '😁') {
-            ctx.beginPath(); ctx.moveTo(96, 114); ctx.lineTo(160, 114); ctx.stroke();
-          }
+          ctx.beginPath(); ctx.arc(128, 96, 36, 0, Math.PI); ctx.closePath(); ctx.fill();
+          ctx.lineWidth = 6; ctx.stroke();
+          if (emoji === '😁') { ctx.beginPath(); ctx.moveTo(96, 114); ctx.lineTo(160, 114); ctx.stroke(); }
         } else if (emoji === '😋') {
-          // Playful eyes + cheeky tongue sticking out
           ctx.lineWidth = 10;
           ctx.beginPath(); ctx.arc(82, 72, 20, Math.PI * 1.1, Math.PI * 1.9); ctx.stroke();
           ctx.beginPath(); ctx.arc(174, 72, 20, Math.PI * 1.1, Math.PI * 1.9); ctx.stroke();
           ctx.lineWidth = 7;
           ctx.beginPath(); ctx.arc(128, 95, 28, 0.1 * Math.PI, 0.9 * Math.PI); ctx.stroke();
-          // Pink tongue
           ctx.fillStyle = '#f43f5e';
           ctx.beginPath(); ctx.ellipse(144, 125, 16, 18, 0.2, 0, Math.PI * 2); ctx.fill();
           ctx.lineWidth = 5; ctx.stroke();
         } else if (emoji === '😙') {
-          // Whistling / smug pursed lips
           ctx.lineWidth = 10;
           ctx.beginPath(); ctx.arc(82, 72, 20, Math.PI * 1.1, Math.PI * 1.9); ctx.stroke();
           ctx.beginPath(); ctx.arc(174, 72, 20, Math.PI * 1.1, Math.PI * 1.9); ctx.stroke();
           ctx.lineWidth = 7;
           ctx.beginPath(); ctx.arc(128, 112, 11, 0, Math.PI * 2); ctx.stroke();
         } else if (emoji === '🥹' || emoji === '🥲') {
-          // Big glistening teary oval eyes + tear drop
           [82, 174].forEach(ex => {
             ctx.fillStyle = '#09090b';
             ctx.beginPath(); ctx.ellipse(ex, 72, 16, 26, 0, 0, Math.PI * 2); ctx.fill();
@@ -2280,21 +2712,16 @@
             ctx.fillStyle = '#38bdf8';
             ctx.beginPath(); ctx.ellipse(ex, 92, 12, 6, 0, 0, Math.PI * 2); ctx.fill();
           });
-          // Falling blue tear on right cheek
           ctx.fillStyle = '#38bdf8';
           ctx.beginPath();
           ctx.moveTo(194, 96); ctx.quadraticCurveTo(212, 122, 194, 132); ctx.quadraticCurveTo(176, 122, 194, 96);
           ctx.fill();
           ctx.lineWidth = 7;
           ctx.beginPath();
-          if (emoji === '🥲') {
-            ctx.arc(128, 106, 22, 0.15 * Math.PI, 0.85 * Math.PI);
-          } else {
-            ctx.arc(128, 128, 18, Math.PI * 1.2, Math.PI * 1.8);
-          }
+          if (emoji === '🥲') ctx.arc(128, 106, 22, 0.15 * Math.PI, 0.85 * Math.PI);
+          else ctx.arc(128, 128, 18, Math.PI * 1.2, Math.PI * 1.8);
           ctx.stroke();
         } else if (emoji === '😞') {
-          // Droopy sad eyebrows & downcast eyes
           ctx.lineWidth = 9;
           ctx.beginPath(); ctx.moveTo(58, 56); ctx.lineTo(100, 44); ctx.stroke();
           ctx.beginPath(); ctx.moveTo(198, 56); ctx.lineTo(156, 44); ctx.stroke();
@@ -2302,7 +2729,6 @@
           ctx.beginPath(); ctx.arc(174, 74, 18, 0.15 * Math.PI, 0.85 * Math.PI); ctx.stroke();
           ctx.beginPath(); ctx.arc(128, 134, 24, Math.PI * 1.15, Math.PI * 1.85); ctx.stroke();
         } else if (emoji === '😫') {
-          // Tightly squeezed > < eyes + open wailing mouth
           ctx.lineWidth = 10;
           ctx.beginPath(); ctx.moveTo(62, 54); ctx.lineTo(96, 70); ctx.lineTo(62, 86); ctx.stroke();
           ctx.beginPath(); ctx.moveTo(194, 54); ctx.lineTo(160, 70); ctx.lineTo(194, 86); ctx.stroke();
@@ -2310,10 +2736,8 @@
           ctx.beginPath(); ctx.ellipse(128, 120, 28, 22, 0, 0, Math.PI * 2); ctx.fill();
           ctx.lineWidth = 6; ctx.stroke();
         } else if (emoji === '😭') {
-          // Waterfall streaming tears from both eyes + huge bawling mouth
           ctx.fillStyle = '#38bdf8';
-          ctx.fillRect(68, 76, 28, 84);
-          ctx.fillRect(160, 76, 28, 84);
+          ctx.fillRect(68, 76, 28, 84); ctx.fillRect(160, 76, 28, 84);
           ctx.lineWidth = 10;
           ctx.beginPath(); ctx.moveTo(62, 74); ctx.lineTo(102, 74); ctx.stroke();
           ctx.beginPath(); ctx.moveTo(154, 74); ctx.lineTo(194, 74); ctx.stroke();
@@ -2321,10 +2745,9 @@
           ctx.beginPath(); ctx.ellipse(128, 122, 26, 24, 0, 0, Math.PI * 2); ctx.fill();
           ctx.lineWidth = 6; ctx.stroke();
         } else {
-          // Default '😃' Classic Bright Bomberman Vertical Oval Eyes + Cheerful Smile
           [82, 174].forEach(ex => {
             ctx.fillStyle = '#09090b';
-            ctx.beginPath(); ctx.ellipse(ex, 68, 13, 28, 0, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.ellipse(ex, 68, 13, 26, 0, 0, Math.PI * 2); ctx.fill();
             ctx.fillStyle = '#ffffff';
             ctx.beginPath(); ctx.arc(ex - 4, 56, 6, 0, Math.PI * 2); ctx.fill();
           });
@@ -2336,97 +2759,171 @@
 
       drawExpressionOnFace('😃');
 
-      const faceFrontMat = new THREE.MeshStandardMaterial({ map: faceTex, roughness: 0.35 });
-      const faceMaterials = [faceVisorMat, faceVisorMat, faceVisorMat, faceVisorMat, faceFrontMat, faceVisorMat];
-      const facePlate = new THREE.Mesh(new THREE.BoxGeometry(0.30, 0.175, 0.085), faceMaterials);
-      facePlate.position.set(0, 0.0, 0.228);
+      const faceFrontMat = new THREE.MeshStandardMaterial({ map: faceTex, roughness: 0.42 });
+      const facePlate = new THREE.Mesh(new THREE.PlaneGeometry(0.27, 0.165), faceFrontMat);
+      facePlate.position.set(0, -0.01, 0.244);
       headGroup.add(facePlate);
 
-      // Stylish 3D Tilted Beret (立體微傾毛呢貝雷帽: Leather Headband Rim + Plush Tilted Crown + Center Stem Tab + Gold Badge)
-      const beretGroup = new THREE.Group();
-      beretGroup.position.set(0.0, 0.175, -0.01);
-      beretGroup.rotation.z = -0.24;
-      beretGroup.rotation.x = -0.09;
-      headGroup.add(beretGroup);
+      // Natural Layered Soft Short Hair (自然分層髮束 + 柔和側分瀏海 + 後腦勺自然層次與後頸碎髮 + 立體小耳朵)
+      const naturalHairGroup = new THREE.Group();
+      headGroup.add(naturalHairGroup);
 
-      // 1) Fitted Dark Leather Headband Rim + Gold Piping
-      const bandMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.245, 0.234, 0.070, 24), beretBandMat);
-      bandMesh.castShadow = true;
-      beretGroup.add(bandMesh);
-
-      const bandGoldPiping = new THREE.Mesh(new THREE.TorusGeometry(0.240, 0.011, 8, 24), goldBuckleMat);
-      bandGoldPiping.rotation.x = Math.PI / 2;
-      bandGoldPiping.position.y = -0.032;
-      beretGroup.add(bandGoldPiping);
-
-      // 2) Plush Sculpted Beret Crown (Full, soft cushion draped jauntily to the right)
-      const crownGeo = new THREE.SphereGeometry(0.295, 28, 22);
-      crownGeo.scale(1.18, 0.49, 1.14);
-      const crownMesh = new THREE.Mesh(crownGeo, beretMat);
-      crownMesh.position.set(0.045, 0.086, -0.012);
-      crownMesh.rotation.z = -0.13;
+      // 1) Base Contoured Hair Crown (Slightly tapered, never a hard helmet ball)
+      const crownGeo = new THREE.SphereGeometry(0.258, 26, 22);
+      crownGeo.scale(1.02, 0.99, 1.04);
+      const crownMesh = new THREE.Mesh(crownGeo, hairMat);
+      crownMesh.position.set(0, 0.032, -0.026);
       crownMesh.castShadow = true;
-      beretGroup.add(crownMesh);
+      naturalHairGroup.add(crownMesh);
 
-      const foldGeo = new THREE.TorusGeometry(0.225, 0.078, 12, 24);
-      foldGeo.scale(1.14, 0.62, 1.10);
-      const foldMesh = new THREE.Mesh(foldGeo, beretMat);
-      foldMesh.rotation.x = Math.PI / 2;
-      foldMesh.position.set(0.040, 0.070, -0.01);
-      beretGroup.add(foldMesh);
+      // 2) Airy Top Crown Layered Hair Locks (Creates natural parted volume & soft silhouette)
+      [
+        [-0.08, 0.235,  0.02, 0.115, 0.65, 1.12,  0.22,  0.10],
+        [ 0.07, 0.238,  0.01, 0.120, 0.62, 1.15, -0.18,  0.08],
+        [ 0.00, 0.242, -0.09, 0.125, 0.62, 1.08,  0.04, -0.18],
+        [-0.14, 0.185, -0.07, 0.105, 0.72, 1.05,  0.35, -0.12],
+        [ 0.14, 0.185, -0.07, 0.105, 0.72, 1.05, -0.35, -0.12]
+      ].forEach(([lx, ly, lz, lr, sy, sz, rz, rx]) => {
+        const lock = new THREE.Mesh(new THREE.SphereGeometry(lr, 14, 12), hairMat);
+        lock.scale.set(1.05, sy, sz);
+        lock.position.set(lx, ly, lz);
+        lock.rotation.set(rx, 0, rz);
+        naturalHairGroup.add(lock);
+      });
 
-      // 3) Iconic Beret Center Stem / Tab ("帽啾")
-      const tabMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.017, 0.023, 0.080, 10), beretMat);
-      tabMesh.position.set(0.036, 0.232, -0.012);
-      tabMesh.rotation.z = -0.18;
-      beretGroup.add(tabMesh);
+      // 3) Soft Side-Parted Layered Forehead Bangs (Cleanly ABOVE eyes & opponent's live emoji visor!)
+      [
+        [-0.145, 0.132, 0.168, 0.068, 0.34],
+        [-0.072, 0.152, 0.195, 0.076, 0.18],
+        [ 0.015, 0.158, 0.204, 0.080, -0.06],
+        [ 0.095, 0.148, 0.190, 0.074, -0.24],
+        [ 0.158, 0.126, 0.162, 0.064, -0.38]
+      ].forEach(([bx, by, bz, br, rz]) => {
+        const bang = new THREE.Mesh(new THREE.SphereGeometry(br, 14, 12), hairMat);
+        bang.scale.set(1.18, 0.72, 0.68);
+        bang.position.set(bx, by, bz);
+        bang.rotation.z = rz;
+        naturalHairGroup.add(bang);
+      });
 
-      // 4) Exquisite Front-Left Gold Beret Emblem Badge with Gemstone Core
-      const badgeBase = new THREE.Mesh(new THREE.CylinderGeometry(0.052, 0.052, 0.024, 16), goldBuckleMat);
-      badgeBase.rotation.x = Math.PI / 2 - 0.15;
-      badgeBase.rotation.z = 0.28;
-      badgeBase.position.set(-0.098, 0.050, 0.250);
-      beretGroup.add(badgeBase);
+      // 4) Natural Layered Back-of-Head Locks & Soft Nape Wisps (Looks organic & stylish from 2nd-person rear camera!)
+      [
+        [-0.14, -0.015, -0.175, 0.095, 1.18, 0.72,  0.18],
+        [-0.05, -0.035, -0.205, 0.102, 1.22, 0.72,  0.06],
+        [ 0.05, -0.035, -0.205, 0.102, 1.22, 0.72, -0.06],
+        [ 0.14, -0.015, -0.175, 0.095, 1.18, 0.72, -0.18],
+        [-0.07, -0.115, -0.175, 0.062, 1.28, 0.62,  0.12],
+        [ 0.07, -0.115, -0.175, 0.062, 1.28, 0.62, -0.12],
+        [ 0.00, -0.125, -0.182, 0.066, 1.32, 0.62,  0.00]
+      ].forEach(([nx, ny, nz, nr, sy, sz, rz]) => {
+        const napeLock = new THREE.Mesh(new THREE.SphereGeometry(nr, 12, 12), hairMat);
+        napeLock.scale.set(0.92, sy, sz);
+        napeLock.position.set(nx, ny, nz);
+        napeLock.rotation.set(0.18, 0, rz);
+        naturalHairGroup.add(napeLock);
+      });
 
-      const badgeGem = new THREE.Mesh(
-        new THREE.OctahedronGeometry(0.028, 0),
-        new THREE.MeshBasicMaterial({ color: isPlayer ? 0x38bdf8 : 0xfbbf24 })
-      );
-      badgeGem.position.set(-0.104, 0.054, 0.264);
-      beretGroup.add(badgeGem);
+      // 5) Soft Tapered Sideburn Wisps & Cute Sculpted Ears
+      [-1, 1].forEach(sideSign => {
+        const sideburn = new THREE.Mesh(new THREE.SphereGeometry(0.058, 12, 12), hairMat);
+        sideburn.scale.set(0.55, 1.48, 0.78);
+        sideburn.position.set(sideSign * 0.222, 0.005, 0.068);
+        const ear = new THREE.Mesh(new THREE.SphereGeometry(0.050, 12, 12), skinMat);
+        ear.scale.set(0.56, 1.08, 0.80);
+        ear.position.set(sideSign * 0.242, -0.015, 0.005);
+        naturalHairGroup.add(sideburn, ear);
+      });
 
-      // Articulated Arms (Shoulder -> Upper Arm -> Elbow -> Forearm -> Bomberman Pink/Gold Round Glove)
+      // Dynamic Secondary Hair Pivot for Female Ponytail / Flowing Long Hair / Soft Bob / Twin Buns!
+      const hairSwingPivot = new THREE.Group();
+      headGroup.add(hairSwingPivot);
+      const hs = charDef.hairStyle;
+
+      if (hs === 'female_ponytail') {
+        // High Energetic Ponytail with Hair Scrunchie + Swaying Layered Tail (High recognizability from rear camera!)
+        hairSwingPivot.position.set(0, 0.14, -0.24);
+        const tieMat = new THREE.MeshStandardMaterial({ color: charDef.wristHex, roughness: 0.55 });
+        const scrunchie = new THREE.Mesh(new THREE.TorusGeometry(0.068, 0.024, 10, 18), tieMat);
+        scrunchie.rotation.x = Math.PI * 0.35;
+        hairSwingPivot.add(scrunchie);
+        // Sculpted cascading ponytail locks
+        const tail1 = new THREE.Mesh(new THREE.SphereGeometry(0.095, 14, 12), hairMat);
+        tail1.scale.set(0.85, 1.55, 0.85); tail1.position.set(0, -0.09, -0.06); tail1.rotation.x = 0.28; tail1.castShadow = true;
+        const tail2 = new THREE.Mesh(new THREE.SphereGeometry(0.082, 14, 12), hairMat);
+        tail2.scale.set(0.75, 1.65, 0.78); tail2.position.set(0, -0.26, -0.10); tail2.rotation.x = 0.14;
+        const tailTip = new THREE.Mesh(new THREE.ConeGeometry(0.055, 0.18, 12), hairMat);
+        tailTip.rotation.x = Math.PI; tailTip.position.set(0, -0.44, -0.11);
+        hairSwingPivot.add(tail1, tail2, tailTip);
+      } else if (hs === 'female_bob') {
+        // Soft Japanese Shoulder-Length Curved Bob Hair (Curved inward around jaw & back!)
+        hairSwingPivot.position.set(0, -0.02, -0.04);
+        for (let a = -3; a <= 3; a++) {
+          const ang = (a / 3.5) * Math.PI * 0.65;
+          const bobLock = new THREE.Mesh(new THREE.SphereGeometry(0.092, 12, 12), hairMat);
+          bobLock.scale.set(0.88, 1.85, 0.72);
+          bobLock.position.set(Math.sin(ang) * 0.22, -0.12, -Math.cos(ang) * 0.20);
+          bobLock.rotation.z = -Math.sin(ang) * 0.14;
+          hairSwingPivot.add(bobLock);
+        }
+      } else if (hs === 'female_buns') {
+        // Cute Sporty Double Hair Buns with Matching Hair Ties
+        const tieMat = new THREE.MeshStandardMaterial({ color: charDef.wristHex, roughness: 0.55 });
+        [-0.20, 0.20].forEach(bx => {
+          const bun = new THREE.Mesh(new THREE.SphereGeometry(0.092, 16, 14), hairMat);
+          bun.position.set(bx, 0.22, -0.09); bun.castShadow = true;
+          const tie = new THREE.Mesh(new THREE.TorusGeometry(0.072, 0.016, 8, 16), tieMat);
+          tie.position.set(bx * 0.92, 0.18, -0.08); tie.rotation.set(0.5, 0, bx > 0 ? -0.6 : 0.6);
+          naturalHairGroup.add(bun, tie);
+        });
+      } else if (hs === 'female_long') {
+        // Flowing Layered Long Hair cascading smoothly down the upper back!
+        hairSwingPivot.position.set(0, -0.02, -0.18);
+        [-0.14, -0.05, 0.05, 0.14].forEach((lx, idx) => {
+          const strand = new THREE.Mesh(new THREE.SphereGeometry(0.092, 14, 12), hairMat);
+          strand.scale.set(0.85, 2.75 + (idx === 1 || idx === 2 ? 0.35 : 0), 0.55);
+          strand.position.set(lx, -0.24, -0.02 - Math.abs(lx) * 0.15);
+          strand.castShadow = true;
+          hairSwingPivot.add(strand);
+        });
+      } else if (hs === 'male_wavy') {
+        // Textured Sporty Wavy Crown Tufts
+        [[-0.08, 0.26, 0.04], [0.07, 0.27, 0.02], [0.0, 0.26, -0.08]].forEach(([wx, wy, wz]) => {
+          const tuft = new THREE.Mesh(new THREE.SphereGeometry(0.075, 12, 10), hairMat);
+          tuft.scale.set(1.1, 0.72, 1.15); tuft.position.set(wx, wy, wz);
+          naturalHairGroup.add(tuft);
+        });
+      }
+
+      // Articulated Arms (Short-Sleeve T-Shirt Cuff -> Natural Bare Forearm -> Athletic Wristband -> Natural Hand)
       function buildArm(sideSign) {
         const shoulderPivot = new THREE.Group();
-        shoulderPivot.position.set(sideSign * 0.35, 0.52, 0);
+        shoulderPivot.position.set(sideSign * (isFemale ? 0.262 : 0.298), 0.48, 0);
 
-        const upperArmGeo = new THREE.CylinderGeometry(0.072, 0.064, 0.34, 12);
-        const upperArm = new THREE.Mesh(upperArmGeo, limbMat);
-        upperArm.position.y = -0.15;
-        upperArm.castShadow = true;
-        shoulderPivot.add(upperArm);
+        // Smooth Rounded Shoulder Cap + Relaxed Cotton Short Sleeve (ZERO stripes!)
+        const shoulderCap = new THREE.Mesh(new THREE.SphereGeometry(0.086, 14, 12), sleeveMat);
+        shoulderCap.scale.set(1.05, 0.92, 0.96);
+        const shortSleeve = new THREE.Mesh(new THREE.CylinderGeometry(0.082, 0.076, 0.19, 14), sleeveMat);
+        shortSleeve.position.set(sideSign * 0.015, -0.09, 0); shortSleeve.rotation.z = sideSign * 0.12; shortSleeve.castShadow = true;
+        // Exposed Bare Upper Arm below Short Sleeve
+        const bareUpper = new THREE.Mesh(new THREE.CylinderGeometry(0.060, 0.054, 0.16, 12), skinMat);
+        bareUpper.position.set(sideSign * 0.02, -0.24, 0);
+        shoulderPivot.add(shoulderCap, shortSleeve, bareUpper);
 
         const elbowPivot = new THREE.Group();
         elbowPivot.position.y = -0.32;
         shoulderPivot.add(elbowPivot);
 
-        const forearmGeo = new THREE.CylinderGeometry(0.062, 0.056, 0.28, 12);
-        const forearm = new THREE.Mesh(forearmGeo, limbMat);
-        forearm.position.y = -0.13;
-        elbowPivot.add(forearm);
-
-        // Bomberman Glove Cuff + Round Bulbous Fist
-        const cuffGeo = new THREE.TorusGeometry(0.065, 0.022, 8, 16);
-        const cuff = new THREE.Mesh(cuffGeo, gloveBootMat);
-        cuff.rotation.x = Math.PI / 2;
-        cuff.position.y = -0.24;
-        elbowPivot.add(cuff);
-
-        const handGeo = new THREE.SphereGeometry(0.092, 16, 16);
-        const hand = new THREE.Mesh(handGeo, gloveBootMat);
-        hand.position.y = -0.31;
-        hand.castShadow = true;
-        elbowPivot.add(hand);
+        // Natural Bare Forearm
+        const forearm = new THREE.Mesh(new THREE.CylinderGeometry(0.058, 0.050, 0.26, 12), skinMat);
+        forearm.position.y = -0.13; forearm.castShadow = true;
+        // Athletic Sporty Wristband (運動護腕)
+        const wristband = new THREE.Mesh(new THREE.CylinderGeometry(0.057, 0.055, 0.068, 14), wristbandMat);
+        wristband.position.y = -0.23;
+        // Natural Bare Hand
+        const hand = new THREE.Mesh(new THREE.SphereGeometry(0.068, 14, 14), skinMat);
+        hand.scale.set(0.92, 1.08, 0.85);
+        hand.position.y = -0.30; hand.castShadow = true;
+        elbowPivot.add(forearm, wristband, hand);
 
         return { shoulderPivot, elbowPivot, hand };
       }
@@ -2437,41 +2934,44 @@
 
       // Held Projectile Attachment on Right Hand
       const heldWeaponAnchor = new THREE.Group();
-      heldWeaponAnchor.position.set(0, -0.33, 0.09);
+      heldWeaponAnchor.position.set(0, -0.32, 0.09);
       rightArm.elbowPivot.add(heldWeaponAnchor);
 
-      // Articulated Legs (Hip -> Thigh -> Knee -> Calf -> Bomberman Pink/Gold Rounded Boots)
+      // Articulated Legs (Slim Side-Stripe Athletic Joggers -> Crew Socks -> Modern Multi-Part Running Sneakers)
       function buildLeg(sideSign) {
         const hipPivot = new THREE.Group();
-        hipPivot.position.set(sideSign * 0.14, 0.0, 0);
+        hipPivot.position.set(sideSign * 0.135, 0.0, 0);
 
-        const thighGeo = new THREE.CylinderGeometry(0.092, 0.078, 0.42, 12);
-        const thigh = new THREE.Mesh(thighGeo, limbMat);
-        thigh.position.y = -0.21;
-        thigh.castShadow = true;
+        // Solid-Color Tapered Athletic Joggers (ZERO Side Stripes!)
+        const thigh = new THREE.Mesh(new THREE.CylinderGeometry(0.096, 0.076, 0.42, 14), joggerMat);
+        thigh.position.y = -0.21; thigh.castShadow = true;
         hipPivot.add(thigh);
 
         const kneePivot = new THREE.Group();
         kneePivot.position.y = -0.42;
         hipPivot.add(kneePivot);
 
-        const calfGeo = new THREE.CylinderGeometry(0.076, 0.065, 0.36, 12);
-        const calf = new THREE.Mesh(calfGeo, limbMat);
-        calf.position.y = -0.18;
-        kneePivot.add(calf);
+        const lowerLegMat = (charDef.bottomStyle === 'shorts' || charDef.bottomStyle === 'skort') ? skinMat : joggerMat;
+        const calf = new THREE.Mesh(new THREE.CylinderGeometry(0.072, 0.056, 0.30, 14), lowerLegMat);
+        calf.position.y = -0.15;
+        // White Athletic Crew Sock showing above Sneaker
+        const sock = new THREE.Mesh(new THREE.CylinderGeometry(0.056, 0.052, 0.09, 12), sockMat);
+        sock.position.y = -0.32;
+        kneePivot.add(calf, sock);
 
-        // Bomberman Boot Cuff + Rounded Boot Body
-        const bootCuff = new THREE.Mesh(new THREE.TorusGeometry(0.075, 0.022, 8, 16), gloveBootMat);
-        bootCuff.rotation.x = Math.PI / 2;
-        bootCuff.position.set(0, -0.32, 0.0);
-        kneePivot.add(bootCuff);
-
-        const shoeGeo = new THREE.SphereGeometry(0.115, 16, 14);
-        shoeGeo.scale(0.95, 0.72, 1.38);
-        const shoe = new THREE.Mesh(shoeGeo, gloveBootMat);
-        shoe.position.set(0, -0.38, 0.045);
-        shoe.castShadow = true;
-        kneePivot.add(shoe);
+        // Modern Multi-Part Running Sneaker (White Cushioned Midsole + Mesh Upper + Toe Cap + Heel Stabilizer)
+        const sneakerGroup = new THREE.Group();
+        sneakerGroup.position.set(0, -0.38, 0.04);
+        const midsole = new THREE.Mesh(new THREE.BoxGeometry(0.145, 0.048, 0.29), sneakerSoleMat);
+        midsole.position.set(0, -0.02, 0.01); midsole.castShadow = true;
+        const upper = new THREE.Mesh(new THREE.BoxGeometry(0.132, 0.075, 0.24), sneakerUpperMat);
+        upper.position.set(0, 0.035, 0.0); upper.castShadow = true;
+        const toeBox = new THREE.Mesh(new THREE.SphereGeometry(0.066, 12, 10), sneakerUpperMat);
+        toeBox.scale.set(1.0, 0.58, 1.15); toeBox.position.set(0, 0.025, 0.115);
+        const heelClip = new THREE.Mesh(new THREE.BoxGeometry(0.138, 0.055, 0.06), sneakerHeelMat);
+        heelClip.position.set(0, 0.028, -0.105);
+        sneakerGroup.add(midsole, upper, toeBox, heelClip);
+        kneePivot.add(sneakerGroup);
 
         return { hipPivot, kneePivot };
       }
@@ -2492,6 +2992,8 @@
         leftLeg,
         rightLeg,
         heldWeaponAnchor,
+        hairSwingPivot,
+        faceTex,
         setExpression(emoji) {
           drawExpressionOnFace(emoji);
         },
@@ -2506,10 +3008,41 @@
       };
     }
 
-    const playerRig = createHumanCharacter({ isPlayer: true, coatColor: 0x0284c7 });
-    const enemyRig = createHumanCharacter({ isPlayer: false, coatColor: 0x991b1b });
-    dynamicGroup.add(playerRig.root);
-    dynamicGroup.add(enemyRig.root);
+    let playerRig = null;
+    let enemyRig = null;
+
+    function disposeCharacterRig(rig) {
+      if (!rig) return;
+      dynamicGroup.remove(rig.root);
+      disposeObjectTree(rig.root);
+      if (rig.faceTex && typeof rig.faceTex.dispose === 'function') {
+        rig.faceTex.dispose();
+      }
+    }
+
+    function pickRandomStageCharacters() {
+      const poolP = CHARACTER_ROSTER.filter(c => c.id !== state.prevPlayerCharId);
+      const pChar = poolP[Math.floor(Math.random() * poolP.length)] || CHARACTER_ROSTER[0];
+      const poolE = CHARACTER_ROSTER.filter(c => c.id !== pChar.id && c.id !== state.prevEnemyCharId);
+      const eChar = poolE[Math.floor(Math.random() * poolE.length)] || CHARACTER_ROSTER.find(c => c.id !== pChar.id);
+      state.prevPlayerCharId = pChar.id;
+      state.prevEnemyCharId = eChar.id;
+      state.playerChar = pChar;
+      state.enemyChar = eChar;
+    }
+
+    function rebuildStageCharacters() {
+      pickRandomStageCharacters();
+      disposeCharacterRig(playerRig);
+      disposeCharacterRig(enemyRig);
+      playerRig = createHumanCharacter({ isPlayer: true, charDef: state.playerChar });
+      enemyRig = createHumanCharacter({ isPlayer: false, charDef: state.enemyChar });
+      dynamicGroup.add(playerRig.root);
+      dynamicGroup.add(enemyRig.root);
+    }
+
+    // Initial cast for Home Screen preview
+    rebuildStageCharacters();
 
     const ENEMY_MOOD_LABELS = {
       '😃': '精神飽滿',
@@ -3864,6 +4397,12 @@
         registerStageProp(g, { type: 'fixed', label: '固定胡桃木圓鼓茶几', x: xPos, z: zPos, halfW: 0.84, halfD: 0.84, maxY: 0.50 });
         // Bounceable coffee cup & art book sitting right on top of the drum table!
         addInteractiveBounceBox(xPos + 0.26, zPos - 0.12, '精品咖啡杯與雜誌', 0xe2e8f0);
+        // Elevate cup/magazine prop neatly on top of the walnut drum table surface (y = 0.44m)
+        const lastObs = state.obstacles[state.obstacles.length - 1];
+        if (lastObs && lastObs.mesh) {
+          lastObs.mesh.position.y = 0.44;
+          lastObs.aabb.maxY = 0.96;
+        }
       }
 
       // 100 Interior Design Multi-Part Italian Modular Low-Back Sofa (Slender Metal Legs + 3 Cushions + Angled Backrests + Throw Blanket)
@@ -4406,12 +4945,12 @@
         addDestructibleVanityOrToy(1, -1.8, 'vanity');
         addDestructibleVanityOrToy(1, 2.4, 'toy');
         addDestructibleSideboard(-1, 2.2, '實木書桌與工作台', 0x5c3a21);
-        addInteractiveFloorLamp(-0.7, -4.8);
+        addInteractiveFloorLamp(0.3, -5.2);
         addInteractiveFloorLamp(3.2, -4.6);
         addInteractiveOttoman(2.2, -1.4, 0xa855f7);
         addInteractiveOttoman(-2.6, 0.8, 0xf472b6);
         addInteractiveBounceBox(2.4, 0.8, '繽紛積木玩具箱', 0x38bdf8);
-        addInteractiveBounceBox(-0.8, -1.2, '羽絨抱枕禮盒', 0xfbbf24);
+        addInteractiveBounceBox(0.3, -1.2, '羽絨抱枕禮盒', 0xfbbf24);
         addInteractiveBounceBox(3.0, -7.2, '香氛精品禮盒', 0xec4899);
         addInteractivePottedPlant(-3.2, -7.4);
         addInteractiveDiningChair(0.9, -6.4, 0x581c87);
@@ -4492,10 +5031,42 @@
       return envGroup;
     }
 
+    // Cleanly dispose unshared stage geometries to prevent WebGL memory leaks across 20 stages on iOS Safari
+    function disposeObjectTree(obj) {
+      obj.traverse(child => {
+        if (child.geometry && child.geometry !== aimDotGeo && child.geometry !== snowGeo && child.geometry !== dustGeo) {
+          child.geometry.dispose();
+        }
+        if (child.material) {
+          const mats = Array.isArray(child.material) ? child.material : [child.material];
+          mats.forEach(m => {
+            // Preserve shared cached textures in texCache, only dispose uncached material instances
+            if (m && typeof m.dispose === 'function') m.dispose();
+          });
+        }
+      });
+    }
+
+    function isAreaClearOfObstacles(x, z, halfW, halfD) {
+      // Keep Player Spawn (0, +4.2) & Opponent Spawn (0, -10.8) & Opponent Rear (Z <= -9.5) strictly clear!
+      if (z <= -9.2) return false;
+      if (Math.hypot(x - 0, z - 4.2) < 1.65) return false;
+      if (Math.hypot(x - 0, z - (-10.8)) < 1.85) return false;
+      for (let i = 0; i < state.obstacles.length; i++) {
+        const b = state.obstacles[i].aabb;
+        if (x + halfW + 0.18 > b.minX && x - halfW - 0.18 < b.maxX && z + halfD + 0.18 > b.minZ && z - halfD - 0.18 < b.maxZ) {
+          return false;
+        }
+      }
+      return true;
+    }
+
     function buildStageScene() {
-      // Clear previous stage meshes
+      // Clear & dispose previous stage meshes safely
       while (stageGroup.children.length > 0) {
-        stageGroup.remove(stageGroup.children[0]);
+        const child = stageGroup.children[0];
+        stageGroup.remove(child);
+        disposeObjectTree(child);
       }
       state.obstacles = [];
 
@@ -4541,19 +5112,30 @@
 
       // 3. Open Seamless Luxury Floor (Center Red Dividing Line removed for authentic residential immersion!)
 
-      // 4. BUILD DESTRUCTIBLE MUSEUM ANTIQUE PEDESTALS (Strictly in Midfield Z between -8.2 and +1.8)
+      // 4. BUILD DESTRUCTIBLE MUSEUM ANTIQUE PEDESTALS (Zero-Overlap Guarded in Midfield Z between -8.0 and +2.0)
       cfg.antiques.forEach(antDef => {
-        let safeZ = Math.max(-7.6, Math.min(2.0, antDef.z));
-        // Keep museum antiques neatly clear of the Center Red Dividing Line (Z = -3.3m)
-        if (Math.abs(safeZ - (-3.3)) < 0.85) {
-          safeZ = safeZ >= -3.3 ? -2.2 : -4.4;
-        }
         const pedW = 0.86;
         const pedD = 0.86;
         const pedH = 0.82;
+        let safeX = antDef.x;
+        let safeZ = Math.max(-8.0, Math.min(2.0, antDef.z));
+        // Automatically relocate if antique would overlap any fixed centerpiece furniture (Bed, Sofa, Supercar, Island, Table)
+        if (!isAreaClearOfObstacles(safeX, safeZ, pedW / 2, pedD / 2)) {
+          const candidates = [
+            [safeX + 1.8, safeZ], [safeX - 1.8, safeZ],
+            [0.0, -7.2], [1.4, 0.8], [-1.4, -7.0], [2.4, -4.0], [-2.2, 1.2]
+          ];
+          let placed = false;
+          for (const [cx, cz] of candidates) {
+            if (Math.abs(cx) <= 3.8 && isAreaClearOfObstacles(cx, cz, pedW / 2, pedD / 2)) {
+              safeX = cx; safeZ = cz; placed = true; break;
+            }
+          }
+          if (!placed) return;
+        }
 
         const antGroup = new THREE.Group();
-        antGroup.position.set(antDef.x, 0, safeZ);
+        antGroup.position.set(safeX, 0, safeZ);
 
         // Rosewood & Gold Trim Museum Pedestal
         const pedMat = new THREE.MeshStandardMaterial({ color: 0x3b180e, roughness: 0.35, metalness: 0.2 });
@@ -4580,8 +5162,8 @@
           intact: true,
           mesh: antGroup,
           aabb: {
-            minX: antDef.x - pedW / 2,
-            maxX: antDef.x + pedW / 2,
+            minX: safeX - pedW / 2,
+            maxX: safeX + pedW / 2,
             minZ: safeZ - pedD / 2,
             maxZ: safeZ + pedD / 2,
             maxY: pedH + 0.90
@@ -4685,7 +5267,7 @@
       const weaponId = fromPlayer ? state.selectedWeaponId : state.enemy.weaponId;
       const wCfg = WEAPONS[weaponId] || WEAPONS.snowball;
 
-      shooter.cooldown = 0.55;
+      shooter.cooldown = wCfg.cooldownSec || 0.50;
       shooter.throwAnim = 1.0; // Triggers single-handed overhead follow-through animation
 
       const mesh = createProjectileMesh(weaponId);
@@ -4720,6 +5302,8 @@
         mesh,
         pos: spawnPos.clone(),
         vel: new THREE.Vector3(vx, vy, vz),
+        rolling: false,
+        bounced: false,
         age: 0
       });
 
@@ -4799,6 +5383,7 @@
       state.particles.forEach(pt => dynamicGroup.remove(pt.mesh));
       state.particles = [];
       state.reactingProps = [];
+      const fl = document.getElementById('floating-layer'); if (fl) fl.innerHTML = '';
 
       // Reset Player at Z = +4.2m
       state.player.pos.set(0, 0, 4.2);
@@ -4824,25 +5409,34 @@
       const weaponKeys = Object.keys(WEAPONS);
       state.enemy.weaponId = weaponKeys[state.stageIdx % weaponKeys.length];
 
-      // Update Opponent Coat & Held Weapon
-      enemyRig.bodyGroup.children[0].material.color.setHex(cfg.enemyCoat);
+      // Randomly cast fresh Male/Female characters for Player & Opponent every stage (with safe disposal!)
+      rebuildStageCharacters();
       enemyRig.setHeldWeapon(state.enemy.weaponId);
       playerRig.setHeldWeapon(state.selectedWeaponId);
       enemyMoodLockTimer = 0;
       setEnemyExpression('😃', 0);
 
-      // Update Top HUD Labels (Concise 4-Character Stage Name)
+      // Update Top HUD Labels (Concise 4-Character Stage Name + 2-Character Random Cast Names)
       document.getElementById('hud-stage-num').textContent = `STAGE ${state.stageIdx + 1}/20`;
       document.getElementById('hud-stage-title').textContent = cfg.name;
       document.getElementById('stage-feature-pill').textContent = `🏛️ ${cfg.subtitle}`;
-      document.getElementById('enemy-hud-title').textContent = cfg.enemyTitle;
-      document.getElementById('enemy-world-name').textContent = cfg.enemyTitle;
+      const pTitleEl = document.getElementById('player-hud-title');
+      if (pTitleEl && state.playerChar) pTitleEl.textContent = `${state.playerChar.name} (你)`;
+      const eName = state.enemyChar ? state.enemyChar.name : cfg.enemyTitle;
+      document.getElementById('enemy-hud-title').textContent = eName;
+      document.getElementById('enemy-world-name').textContent = eName;
+
+      // Reset per-stage combat polish states
+      state.hitStopTimer = 0;
+      state.camShake = 0;
+      state.playerCombo = 0;
+      state.playerHitRecoil = 0;
+      state.enemyHitRecoil = 0;
+      state.introTimer = 0.65; // Smooth 0.65s architectural intro camera glide
 
       buildStageScene();
       updateHealthBarsUI();
       updateWeaponHUD();
-
-      // Switch between Mozart Allegro Suite 0 and Suite 1 on alternate stages
       sound.startBGM();
     }
 
@@ -4961,6 +5555,12 @@
       rig.bodyGroup.rotation.x = THREE.MathUtils.lerp(rig.bodyGroup.rotation.x, targetLeanX, dt * 11);
       const crouchOffset = isMoving ? -Math.min(0.05, speedMag * 0.008) : 0;
       rig.bodyGroup.position.y = 0.85 + crouchOffset + (isMoving ? Math.abs(Math.sin(charState.walkCycle * 2)) * 0.045 : 0);
+      if (rig.hairSwingPivot) {
+        const swayX = isMoving ? 0.14 + Math.abs(Math.sin(charState.walkCycle)) * 0.16 : 0.03;
+        const swayZ = isMoving ? THREE.MathUtils.clamp(charState.vel.x * 0.055 * bankSign, -0.28, 0.28) : Math.sin(performance.now() * 0.0025) * 0.03;
+        rig.hairSwingPivot.rotation.x = THREE.MathUtils.lerp(rig.hairSwingPivot.rotation.x, swayX, dt * 10);
+        rig.hairSwingPivot.rotation.z = THREE.MathUtils.lerp(rig.hairSwingPivot.rotation.z, swayZ, dt * 10);
+      }
 
       // ARM POSE LOGIC:
       // 1) Normal Idle & 3D Running Pose: Natural EMPTY-HANDED "Hands Forward" relaxed stance (heldWeaponAnchor.visible = false)
@@ -5008,7 +5608,69 @@
     // =========================================================================
     let lastTime = performance.now();
 
+    // Line-of-Sight ray check so Opponent AI flanks around fixed furniture instead of shooting into its own cover!
+    function hasLineOfSight(fromX, fromZ, toX, toZ) {
+      const steps = 12;
+      for (let sIdx = 1; sIdx < steps; sIdx++) {
+        const t = sIdx / steps;
+        const px = fromX + (toX - fromX) * t;
+        const pz = fromZ + (toZ - fromZ) * t;
+        for (let i = 0; i < state.obstacles.length; i++) {
+          const obs = state.obstacles[i];
+          if (!obs.intact || obs.type !== 'fixed') continue;
+          const b = obs.aabb;
+          if (b.maxY >= 0.95 && px > b.minX - 0.15 && px < b.maxX + 0.15 && pz > b.minZ - 0.15 && pz < b.maxZ + 0.15) {
+            return false;
+          }
+        }
+      }
+      return true;
+    }
+
+    // Update 3D Parabolic Aiming Trajectory Dots & Landing Reticle synced with exact weapon ballistics
+    function updateAimTrajectoryVisual() {
+      if (state.phase !== 'PLAYING') {
+        aimArcGroup.visible = false;
+        return;
+      }
+      const p = state.player;
+      const wCfg = WEAPONS[state.selectedWeaponId] || WEAPONS.snowball;
+      const charge = p.charging ? p.chargePower : 0.35;
+      const speed = wCfg.baseSpeed + charge * wCfg.maxBoost;
+      const vx = p.vel.x * 0.42;
+      const vy0 = wCfg.arcLift * (0.62 + charge * 0.52);
+      const vz = -speed;
+      const sx = p.pos.x + 0.32;
+      const sy = 1.92;
+      const sz = p.pos.z - 0.55;
+
+      // Compute flight time until hitting y = 0.25m
+      const disc = vy0 * vy0 + 2 * wCfg.gravity * (sy - 0.25);
+      const tFlight = Math.min(1.15, (vy0 + Math.sqrt(Math.max(0.01, disc))) / wCfg.gravity);
+
+      aimArcGroup.visible = true;
+      for (let i = 0; i < AIM_DOT_COUNT; i++) {
+        const t = ((i + 1) / AIM_DOT_COUNT) * tFlight;
+        const x = sx + vx * t;
+        const y = Math.max(0.08, sy + vy0 * t - 0.5 * wCfg.gravity * t * t);
+        const z = sz + vz * t;
+        aimDots[i].position.set(x, y, z);
+        aimDots[i].material.opacity = p.charging ? (0.85 - (i / AIM_DOT_COUNT) * 0.35) : (0.38 - (i / AIM_DOT_COUNT) * 0.22);
+      }
+      const lx = Math.max(-4.5, Math.min(4.5, sx + vx * tFlight));
+      const lz = Math.max(-12.5, Math.min(4.0, sz + vz * tFlight));
+      aimReticle.position.set(lx, 0.04, lz);
+      const pulse = 1.0 + Math.sin(performance.now() * 0.009) * 0.10;
+      aimReticle.scale.setScalar(p.charging ? pulse * 1.15 : pulse * 0.85);
+      aimReticle.material.opacity = p.charging ? 0.88 : 0.42;
+    }
+
     function updateGame(dt) {
+      // 35ms Hit-Stop freeze frame for crisp App Store impact feel!
+      if (state.hitStopTimer > 0) {
+        state.hitStopTimer = Math.max(0, state.hitStopTimer - dt);
+        return;
+      }
       // Animate Snowfall
       if (snowParticles.visible) {
         const posAttr = snowGeo.attributes.position;
@@ -5075,6 +5737,8 @@
         const pct = Math.round(p.chargePower * 100);
         document.getElementById('charge-pct-txt').textContent = `${pct}%`;
         document.getElementById('charge-bar-fill').style.width = `${pct}%`;
+        const ringEl = document.getElementById('throw-charge-ring');
+        if (ringEl) ringEl.style.strokeDashoffset = String(289 * (1 - p.chargePower));
       }
 
       // 2) OPPONENT AI MOVEMENT + SOLID OBSTACLE COLLISION (NEVER CLIPS INTO OBSTACLES)
@@ -5082,18 +5746,41 @@
       if (e.cooldown > 0) e.cooldown = Math.max(0, e.cooldown - dt);
       if (e.invuln > 0) e.invuln = Math.max(0, e.invuln - dt);
 
+      // Smart App-Store Tactical AI: Incoming Projectile Dodge + Line-of-Sight Flanking + 20-Stage Difficulty Curve
+      const diffRatio = state.stageIdx / 19; // 0.0 (Stage 1) -> 1.0 (Stage 20)
+      let dodging = false;
+      // Check for incoming player projectiles to sidestep smoothly
+      for (let pi = 0; pi < state.projectiles.length; pi++) {
+        const pr = state.projectiles[pi];
+        if (pr.fromPlayer && pr.vel.z < -2 && pr.pos.z > e.pos.z && (pr.pos.z - e.pos.z) < 6.8) {
+          if (Math.abs(pr.pos.x - e.pos.x) < 1.35) {
+            const dodgeDir = e.pos.x >= pr.pos.x ? 1 : -1;
+            e.targetX = THREE.MathUtils.clamp(e.pos.x + dodgeDir * 2.4, -3.9, 3.9);
+            dodging = true;
+            break;
+          }
+        }
+      }
+
+      const losClear = hasLineOfSight(e.pos.x, e.pos.z, p.pos.x, p.pos.z);
       e.moveTimer -= dt;
-      if (e.moveTimer <= 0) {
-        e.moveTimer = 0.75 + Math.random() * 0.85;
-        // Opponent agile 3D patrol strictly on opponent's side of Center Red Line (Z: -10.2m..-4.6m, keeping Z <= -10.8m clear)
-        e.targetX = (Math.random() - 0.5) * 7.4;
-        e.targetZ = -10.2 + Math.random() * 5.2;
+      if (!dodging && (e.moveTimer <= 0 || !losClear)) {
+        e.moveTimer = (0.95 - diffRatio * 0.30) + Math.random() * 0.65;
+        if (!losClear) {
+          // Actively flank laterally around sofa/bed/supercar/island to get a clean shot!
+          const flankDir = e.pos.x <= p.pos.x ? 1 : -1;
+          e.targetX = THREE.MathUtils.clamp(p.pos.x + flankDir * (1.2 + Math.random() * 1.4), -3.9, 3.9);
+          e.targetZ = -9.6 + Math.random() * 3.8;
+        } else {
+          e.targetX = (Math.random() - 0.5) * 7.2;
+          e.targetZ = -10.2 + Math.random() * 4.8;
+        }
       }
 
       const dxE = e.targetX - e.pos.x;
       const dzE = e.targetZ - e.pos.z;
       const distE = Math.hypot(dxE, dzE);
-      const enemySpd = 3.8 + state.stageIdx * 0.08;
+      const enemySpd = (3.4 + diffRatio * 1.8) * (dodging ? 1.25 : 1.0);
       if (distE > 0.15) {
         e.vel.x = (dxE / distE) * enemySpd;
         e.vel.z = (dzE / distE) * enemySpd;
@@ -5103,28 +5790,28 @@
         e.vel.set(0, 0, 0);
       }
       e.pos.x = Math.max(-4.2, Math.min(4.2, e.pos.x));
-      e.pos.z = Math.max(-10.8, Math.min(-4.0, e.pos.z));
+      e.pos.z = Math.max(-10.8, Math.min(-4.2, e.pos.z));
       resolveCharacterObstacleCollision(e.pos, e.radius);
 
-      // Opponent Overhead Throw AI
+      // Opponent Overhead Throw AI (Only fires when Line-of-Sight is open, preventing dumb self-cover throws!)
       if (enemyMoodLockTimer > 0) {
         enemyMoodLockTimer = Math.max(0, enemyMoodLockTimer - dt);
         if (enemyMoodLockTimer <= 0 && !e.charging) {
           setEnemyExpression(pickIdleExpressionByHP(), 0);
         }
       }
-      if (!e.charging && e.cooldown <= 0) {
+      if (!e.charging && e.cooldown <= 0 && losClear) {
         e.charging = true;
         e.chargePower = 0;
-        e.chargeTarget = 0.45 + Math.random() * 0.5;
+        e.chargeTarget = 0.42 + Math.random() * 0.48;
         if (enemyMoodLockTimer <= 0 && e.hp > 1) setEnemyExpression('😁', 0.9);
       } else if (e.charging) {
-        e.chargePower += dt * (0.95 + state.stageIdx * 0.025);
+        e.chargePower += dt * (0.88 + diffRatio * 0.45);
         if (e.chargePower >= e.chargeTarget) {
           e.charging = false;
           fireProjectile(false, Math.min(1.0, e.chargePower));
           e.chargePower = 0;
-          e.cooldown = Math.max(0.75, 1.55 - state.stageIdx * 0.035);
+          e.cooldown = Math.max(0.68, 1.58 - diffRatio * 0.72);
         }
       }
 
@@ -5145,135 +5832,199 @@
       updateCharacterRigAnimation(playerRig, p, dt, moveLen > 0.08, true);
       updateCharacterRigAnimation(enemyRig, e, dt, distE > 0.15, false);
 
-      // 3) PROJECTILE BALLISTICS & COLLISIONS
+      // 3) 4x SUB-STEPPED SWEPT PROJECTILE BALLISTICS & COLLISIONS (Zero Tunneling + Bowling Ground Roll + Brick Bounce!)
+      const SUBSTEPS = 4;
+      const subDt = dt / SUBSTEPS;
+
       for (let i = state.projectiles.length - 1; i >= 0; i--) {
         const proj = state.projectiles[i];
         proj.age += dt;
-        proj.vel.y -= proj.wCfg.gravity * dt;
-        proj.pos.addScaledVector(proj.vel, dt);
-        proj.mesh.position.copy(proj.pos);
-
-        // Rotate projectile in flight (maple bat spins end-over-end!)
-        proj.mesh.rotation.x += proj.wCfg.spinSpeed.x * dt;
-        proj.mesh.rotation.y += proj.wCfg.spinSpeed.y * dt;
-        proj.mesh.rotation.z += proj.wCfg.spinSpeed.z * dt;
-
         let removed = false;
 
-        // Floor or out-of-bounds check
-        if (proj.pos.y <= 0.15 || Math.abs(proj.pos.x) > 9.3 || proj.pos.z < -14.2 || proj.pos.z > 8.5) {
-          spawnParticles(proj.pos, proj.wCfg.colorHex, 10, 0.65);
-          dynamicGroup.remove(proj.mesh);
-          state.projectiles.splice(i, 1);
-          continue;
-        }
+        for (let step = 0; step < SUBSTEPS && !removed; step++) {
+          if (!proj.rolling) {
+            proj.vel.y -= proj.wCfg.gravity * subDt;
+          } else {
+            // Bowling ball rolling along floor with realistic momentum & subtle deceleration
+            proj.vel.x *= Math.max(0, 1 - 0.55 * subDt);
+            proj.vel.z *= Math.max(0, 1 - 0.55 * subDt);
+          }
+          proj.pos.addScaledVector(proj.vel, subDt);
 
-        // Check Obstacle Collisions (Indestructible Eaves & Destructible Antiques)
-        for (let j = 0; j < state.obstacles.length; j++) {
-          const obs = state.obstacles[j];
-          if (!obs.intact) continue;
-          const b = obs.aabb;
-          const r = proj.wCfg.hitRadius * 0.65;
-
-          if (
-            proj.pos.x + r > b.minX &&
-            proj.pos.x - r < b.maxX &&
-            proj.pos.z + r > b.minZ &&
-            proj.pos.z - r < b.maxZ &&
-            proj.pos.y < b.maxY
-          ) {
-            if (obs.type === 'fixed') {
-              // Indestructible Fixed Architectural Furniture (Sofa, Bed, IH Stove & Range Hood, Diving Board, Supercar)
+          // Floor contact behavior per weapon:
+          // - Bowling Ball: rolls along the floor!
+          // - Red Brick: bounces once cleanly!
+          // - Snowball / Bat: impacts floor with crisp particles!
+          if (proj.pos.y <= 0.24) {
+            if (proj.wCfg.groundRoll && !proj.rolling) {
+              proj.pos.y = 0.28;
+              proj.vel.y = 0;
+              proj.rolling = true;
               sound.playBlockEave();
-              spawnParticles(proj.pos, 0x94a3b8, 12, 0.75);
-              showFloatingText(proj.pos, `🛡️ ${obs.label}（固定不可破壞）`, 'text-slate-200 text-xs');
-            } else if (obs.type === 'robot') {
-              // Interactive Lobby Reception Robot: Knocks down for 5 seconds, NEVER destroyed, then stands back up!
-              if (obs.knockedTimer <= 0) {
-                obs.knockedTimer = 5.0;
-                sound.playShatterAntique();
-                spawnParticles(proj.pos, 0x38bdf8, 18, 1.0);
-                spawnParticles(proj.pos, 0xfbbf24, 12, 0.9);
-                showFloatingText(proj.pos, '🤖 💫 接待機器人倒地 (5秒後起身)', 'text-cyan-300 text-xs');
-              } else {
-                sound.playBlockEave();
-                showFloatingText(proj.pos, `🤖 頭暈中... (${Math.ceil(obs.knockedTimer)}s)`, 'text-cyan-200 text-xs');
-              }
-            } else if (obs.type === 'destructible') {
-              // Trigger 1 of 4 Realistic Hit Physics Reactions: TOPPLE | SHATTER | ROLL | BOUNCE
-              obs.intact = false;
-              if (proj.fromPlayer) state.stats.antiquesBroken++;
-              updateIntactAntiquesUI();
+              spawnParticles(proj.pos, 0x94a3b8, 6, 0.5);
+            } else if (proj.wCfg.highBounce && !proj.bounced) {
+              proj.pos.y = 0.26;
+              proj.vel.y = Math.abs(proj.vel.y) * 0.48;
+              proj.vel.z *= 0.78;
+              proj.bounced = true;
+              sound.playBlockEave();
+              spawnParticles(proj.pos, 0xb91c1c, 10, 0.7);
+            } else if (!proj.rolling) {
+              spawnParticles(proj.pos, proj.wCfg.colorHex, 10, 0.65);
+              dynamicGroup.remove(proj.mesh);
+              state.projectiles.splice(i, 1);
+              removed = true;
+              break;
+            }
+          }
 
-              const dirLen = Math.hypot(proj.vel.x, proj.vel.z) || 1;
-              const ix = proj.vel.x / dirLen;
-              const iz = proj.vel.z / dirLen;
-              const react = obs.hitReaction || 'SHATTER';
+          // Out of bounds or expired rolling ball check
+          if (Math.abs(proj.pos.x) > 9.3 || proj.pos.z < -14.2 || proj.pos.z > 8.5 || proj.age > 3.2 || (proj.rolling && Math.abs(proj.vel.z) < 2.2)) {
+            spawnParticles(proj.pos, proj.wCfg.colorHex, 8, 0.55);
+            dynamicGroup.remove(proj.mesh);
+            state.projectiles.splice(i, 1);
+            removed = true;
+            break;
+          }
 
-              if (react === 'SHATTER') {
-                // SHATTER: Explodes into 28+ flying 3D shards with crisp glass/ceramic sound
-                obs.mesh.visible = false;
-                sound.playShatterAntique();
-                spawnParticles(proj.pos, obs.shatterColor || 0xfbbf24, 28, 1.32);
-                spawnParticles(proj.pos, 0xe0f2fe, 14, 1.05);
-                showFloatingText(proj.pos, `💥 破裂！${obs.label}碎裂飛散`, 'text-sky-300 text-xs');
-              } else if (react === 'TOPPLE') {
-                // TOPPLE: Heavy realistic backward tip-over around base axis + floor bounce
+          // Swept Obstacle Collision Check (Fixed / Robot / Destructible / Antique)
+          for (let j = 0; j < state.obstacles.length; j++) {
+            const obs = state.obstacles[j];
+            if (!obs.intact) continue;
+            const b = obs.aabb;
+            const r = proj.wCfg.hitRadius * 0.65;
+
+            if (
+              proj.pos.x + r > b.minX &&
+              proj.pos.x - r < b.maxX &&
+              proj.pos.z + r > b.minZ &&
+              proj.pos.z - r < b.maxZ &&
+              proj.pos.y < b.maxY
+            ) {
+              if (obs.type === 'fixed') {
                 sound.playBlockEave();
-                spawnParticles(proj.pos, obs.shatterColor || 0xfbbf24, 12, 0.85);
-                state.reactingProps.push({
-                  mesh: obs.mesh,
-                  reaction: 'TOPPLE',
-                  dirX: ix,
-                  dirZ: iz,
-                  angle: 0,
-                  angVel: 2.2,
-                  bounced: false,
-                  life: 3.0
-                });
-                showFloatingText(proj.pos, `🪵 倒塌！${obs.label}重重倒下`, 'text-amber-300 text-xs');
-              } else if (react === 'ROLL') {
-                // ROLL: High-speed rolling & spinning away across the marble floor
-                sound.playBlockEave();
-                spawnParticles(proj.pos, obs.shatterColor || 0x38bdf8, 10, 0.75);
-                state.reactingProps.push({
-                  mesh: obs.mesh,
-                  reaction: 'ROLL',
-                  vx: ix * 8.5 + (Math.random() - 0.5) * 2.5,
-                  vz: iz * 8.5 + (Math.random() - 0.5) * 2.5,
-                  life: 3.2
-                });
-                showFloatingText(proj.pos, `🌀 滾走！${obs.label}高速翻滾`, 'text-emerald-300 text-xs');
-              } else {
-                // BOUNCE: Launches airborne and bounces 2–3 times off the floor!
-                sound.playThrow('snowball');
-                spawnParticles(proj.pos, obs.shatterColor || 0xf43f5e, 12, 0.9);
-                state.reactingProps.push({
-                  mesh: obs.mesh,
-                  reaction: 'BOUNCE',
-                  vx: ix * 5.8 + (Math.random() - 0.5) * 2.4,
-                  vy: 5.8 + Math.random() * 1.6,
-                  vz: iz * 5.8 + (Math.random() - 0.5) * 2.4,
-                  rotVx: (Math.random() - 0.5) * 10,
-                  rotVz: (Math.random() - 0.5) * 10,
-                  life: 3.2
-                });
-                showFloatingText(proj.pos, `⚡ 彈走！${obs.label}騰空彈飛`, 'text-pink-300 text-xs');
-              }
-            } else if (obs.type === 'antique') {
-              if (proj.chargeRatio >= proj.wCfg.canBreakAntiqueMinCharge) {
+                spawnParticles(proj.pos, 0x94a3b8, 12, 0.75);
+                showFloatingText(proj.pos, `🛡️ ${obs.label}`, 'text-slate-200 text-xs');
+              } else if (obs.type === 'robot') {
+                if (obs.knockedTimer <= 0) {
+                  obs.knockedTimer = 5.0;
+                  state.camShake = Math.max(state.camShake, 0.16);
+                  sound.playShatterAntique();
+                  spawnParticles(proj.pos, 0x38bdf8, 18, 1.0);
+                  spawnParticles(proj.pos, 0xfbbf24, 12, 0.9);
+                  showFloatingText(proj.pos, '🤖 機器人當機 5s!', 'text-cyan-300 text-xs');
+                } else {
+                  sound.playBlockEave();
+                  showFloatingText(proj.pos, `🤖 頭暈中 (${Math.ceil(obs.knockedTimer)}s)`, 'text-cyan-200 text-xs');
+                }
+              } else if (obs.type === 'destructible') {
                 obs.intact = false;
-                obs.mesh.visible = false;
-                sound.playShatterAntique();
-                spawnParticles(proj.pos, 0xfbbf24, 24, 1.15);
-                spawnParticles(proj.pos, 0x38bdf8, 16, 1.0);
                 if (proj.fromPlayer) state.stats.antiquesBroken++;
                 updateIntactAntiquesUI();
-                showFloatingText(proj.pos, `💥 擊碎${obs.label}！`, 'text-amber-300 text-xs');
+
+                const dirLen = Math.hypot(proj.vel.x, proj.vel.z) || 1;
+                const ix = proj.vel.x / dirLen;
+                const iz = proj.vel.z / dirLen;
+                const react = obs.hitReaction || 'SHATTER';
+
+                if (react === 'SHATTER') {
+                  obs.mesh.visible = false;
+                  sound.playShatterAntique();
+                  spawnParticles(proj.pos, obs.shatterColor || 0xfbbf24, 28, 1.32);
+                  spawnParticles(proj.pos, 0xe0f2fe, 14, 1.05);
+                  showFloatingText(proj.pos, `💥 ${obs.label}破裂！`, 'text-sky-300 text-xs');
+                } else if (react === 'TOPPLE') {
+                  sound.playBlockEave();
+                  spawnParticles(proj.pos, obs.shatterColor || 0xfbbf24, 12, 0.85);
+                  state.reactingProps.push({ mesh: obs.mesh, reaction: 'TOPPLE', dirX: ix, dirZ: iz, angle: 0, angVel: 2.2, bounced: false, life: 3.0 });
+                  showFloatingText(proj.pos, `🪵 ${obs.label}倒塌！`, 'text-amber-300 text-xs');
+                } else if (react === 'ROLL') {
+                  sound.playBlockEave();
+                  spawnParticles(proj.pos, obs.shatterColor || 0x38bdf8, 10, 0.75);
+                  state.reactingProps.push({ mesh: obs.mesh, reaction: 'ROLL', vx: ix * 8.5 + (Math.random() - 0.5) * 2.5, vz: iz * 8.5 + (Math.random() - 0.5) * 2.5, life: 3.2 });
+                  showFloatingText(proj.pos, `🌀 ${obs.label}滾走！`, 'text-emerald-300 text-xs');
+                } else {
+                  sound.playThrow('snowball');
+                  spawnParticles(proj.pos, obs.shatterColor || 0xf43f5e, 12, 0.9);
+                  state.reactingProps.push({ mesh: obs.mesh, reaction: 'BOUNCE', vx: ix * 5.8 + (Math.random() - 0.5) * 2.4, vy: 5.8 + Math.random() * 1.6, vz: iz * 5.8 + (Math.random() - 0.5) * 2.4, rotVx: (Math.random() - 0.5) * 10, rotVz: (Math.random() - 0.5) * 10, life: 3.2 });
+                  showFloatingText(proj.pos, `⚡ ${obs.label}彈飛！`, 'text-pink-300 text-xs');
+                }
+                // Heavy rolling bowling ball plows right through light destructible props!
+                if (proj.rolling) continue;
+              } else if (obs.type === 'antique') {
+                if (proj.chargeRatio >= proj.wCfg.canBreakAntiqueMinCharge || proj.rolling) {
+                  obs.intact = false;
+                  obs.mesh.visible = false;
+                  sound.playShatterAntique();
+                  spawnParticles(proj.pos, 0xfbbf24, 24, 1.15);
+                  spawnParticles(proj.pos, 0x38bdf8, 16, 1.0);
+                  if (proj.fromPlayer) state.stats.antiquesBroken++;
+                  updateIntactAntiquesUI();
+                  showFloatingText(proj.pos, `💥 擊碎${obs.label}！`, 'text-amber-300 text-xs');
+                  if (proj.rolling) continue;
+                } else {
+                  sound.playBlockEave();
+                  spawnParticles(proj.pos, 0xfde68a, 10, 0.6);
+                  showFloatingText(proj.pos, '🛡️ 蓄力不足未擊碎', 'text-amber-200 text-xs');
+                }
+              }
+              dynamicGroup.remove(proj.mesh);
+              state.projectiles.splice(i, 1);
+              removed = true;
+              break;
+            }
+          }
+          if (removed) break;
+
+          // Swept Character Hit Check (Strictly -1 HP per hit + 35ms Hit-Stop + Soft Cam Shake + Recoil!)
+          const target = proj.fromPlayer ? state.enemy : state.player;
+          const horizDist = Math.hypot(proj.pos.x - target.pos.x, proj.pos.z - target.pos.z);
+
+          if (horizDist < (target.radius + proj.wCfg.hitRadius * 0.78) && proj.pos.y >= 0.15 && proj.pos.y <= 2.15) {
+            if (target.invuln <= 0) {
+              target.hp = Math.max(0, Math.round(target.hp) - 1);
+              target.invuln = 0.38;
+              state.hitStopTimer = 0.035; // 35ms App Store impact hit-stop
+              state.camShake = 0.24;
+              updateHealthBarsUI();
+              sound.playHitCharacter(!proj.fromPlayer);
+              spawnParticles(proj.pos, proj.wCfg.colorHex, 24, 1.15);
+
+              if (proj.fromPlayer) {
+                state.stats.hits++;
+                state.playerCombo++;
+                state.enemyHitRecoil = 0.28;
+                const remHp = Math.round(target.hp);
+                let hitEmoji = '🥹';
+                if (remHp <= 0) hitEmoji = '😭';
+                else if (remHp === 1) hitEmoji = '😫';
+                else if (remHp === 2) hitEmoji = '😞';
+                else hitEmoji = Math.random() > 0.45 ? '🥹' : '🥲';
+                setEnemyExpression(hitEmoji, 1.8);
+                const comboTxt = state.playerCombo >= 2 ? ` 🔥${state.playerCombo}連擊!` : '';
+                showFloatingText(
+                  new THREE.Vector3(target.pos.x, 2.05, target.pos.z),
+                  `${hitEmoji} 命中 -1 ♥${comboTxt}`,
+                  'text-emerald-300 text-sm'
+                );
               } else {
-                sound.playBlockEave();
-                spawnParticles(proj.pos, 0xfde68a, 10, 0.6);
-                showFloatingText(proj.pos, '🛡️ 蓄力不足未擊碎', 'text-amber-200 text-xs');
+                state.playerCombo = 0;
+                state.playerHitRecoil = 0.28;
+                setEnemyExpression(Math.random() > 0.4 ? '😋' : '😁', 1.6);
+                const vig = document.getElementById('dmg-vignette');
+                vig.style.opacity = '1';
+                setTimeout(() => { vig.style.opacity = '0'; }, 220);
+                showFloatingText(
+                  new THREE.Vector3(target.pos.x, 2.05, target.pos.z),
+                  `❗ 被打中 -1 ♥`,
+                  'text-rose-400 text-sm'
+                );
+              }
+
+              if (state.enemy.hp <= 0) {
+                triggerStageEnd(true);
+              } else if (state.player.hp <= 0) {
+                triggerStageEnd(false);
               }
             }
             dynamicGroup.remove(proj.mesh);
@@ -5282,59 +6033,12 @@
             break;
           }
         }
-        if (removed) continue;
 
-        // Check Character Hit
-        const target = proj.fromPlayer ? state.enemy : state.player;
-        const dx = proj.pos.x - target.pos.x;
-        const dz = proj.pos.z - target.pos.z;
-        const horizDist = Math.hypot(dx, dz);
-
-        if (horizDist < (target.radius + proj.wCfg.hitRadius * 0.75) && proj.pos.y >= 0.2 && proj.pos.y <= 2.15) {
-          if (target.invuln <= 0) {
-            // Strictly deduct 1 HP (-1 life) per hit regardless of projectile type
-            const dmg = 1;
-            target.hp = Math.max(0, Math.round(target.hp) - 1);
-            target.invuln = 0.35;
-            updateHealthBarsUI();
-            sound.playHitCharacter(!proj.fromPlayer);
-            spawnParticles(proj.pos, proj.wCfg.colorHex, 22, 1.1);
-
-            if (proj.fromPlayer) {
-              state.stats.hits++;
-              const remHp = Math.round(target.hp);
-              let hitEmoji = '🥹';
-              if (remHp <= 0) hitEmoji = '😭';
-              else if (remHp === 1) hitEmoji = '😫';
-              else if (remHp === 2) hitEmoji = '😞';
-              else hitEmoji = Math.random() > 0.45 ? '🥹' : '🥲';
-              setEnemyExpression(hitEmoji, 1.8);
-              showFloatingText(
-                new THREE.Vector3(target.pos.x, 2.0, target.pos.z),
-                `${hitEmoji} ${proj.wCfg.shortName}命中 -1 HP!`,
-                'text-emerald-300 text-sm'
-              );
-            } else {
-              // Opponent landed a hit on player -> cheeky 😋 or 😁!
-              setEnemyExpression(Math.random() > 0.4 ? '😋' : '😁', 1.6);
-              const vig = document.getElementById('dmg-vignette');
-              vig.style.opacity = '1';
-              setTimeout(() => { vig.style.opacity = '0'; }, 220);
-              showFloatingText(
-                new THREE.Vector3(target.pos.x, 2.0, target.pos.z),
-                `❗ 遭受攻擊 -1 HP`,
-                'text-rose-400 text-sm'
-              );
-            }
-
-            if (state.enemy.hp <= 0) {
-              triggerStageEnd(true);
-            } else if (state.player.hp <= 0) {
-              triggerStageEnd(false);
-            }
-          }
-          dynamicGroup.remove(proj.mesh);
-          state.projectiles.splice(i, 1);
+        if (!removed) {
+          proj.mesh.position.copy(proj.pos);
+          proj.mesh.rotation.x += proj.wCfg.spinSpeed.x * dt;
+          proj.mesh.rotation.y += proj.wCfg.spinSpeed.y * dt;
+          proj.mesh.rotation.z += proj.wCfg.spinSpeed.z * dt;
         }
       }
 
@@ -5430,13 +6134,39 @@
         pt.mesh.scale.setScalar(Math.max(0.01, pt.life * 1.4));
       }
 
-      // 5) STABLE SECOND-PERSON OVER-THE-SHOULDER CAMERA
-      const desiredCamX = p.pos.x * 0.62;
-      const desiredCamY = 3.95;
-      const desiredCamZ = p.pos.z + 5.65;
-      camera.position.x = THREE.MathUtils.lerp(camera.position.x, desiredCamX, dt * 7.0);
-      camera.position.y = THREE.MathUtils.lerp(camera.position.y, desiredCamY, dt * 7.0);
-      camera.position.z = THREE.MathUtils.lerp(camera.position.z, desiredCamZ, dt * 7.0);
+      // Apply subtle hit recoil backward tilt on characters
+      if (state.playerHitRecoil > 0) {
+        state.playerHitRecoil = Math.max(0, state.playerHitRecoil - dt);
+        playerRig.bodyGroup.rotation.x = -state.playerHitRecoil * 1.4;
+      }
+      if (state.enemyHitRecoil > 0) {
+        state.enemyHitRecoil = Math.max(0, state.enemyHitRecoil - dt);
+        enemyRig.bodyGroup.rotation.x = -state.enemyHitRecoil * 1.4;
+      }
+
+      // Update 3D Parabolic Aiming Trajectory Preview
+      updateAimTrajectoryVisual();
+
+      // 5) SECOND-PERSON OVER-THE-SHOULDER CAMERA + 0.65s CINEMATIC INTRO GLIDE + IMPACT SHAKE
+      let desiredCamX = p.pos.x * 0.62;
+      let desiredCamY = 3.95;
+      let desiredCamZ = p.pos.z + 5.65;
+      if (state.introTimer > 0) {
+        state.introTimer = Math.max(0, state.introTimer - dt);
+        const k = state.introTimer / 0.65; // 1 -> 0
+        desiredCamX += Math.sin(k * Math.PI) * 2.2;
+        desiredCamY += k * 1.8;
+        desiredCamZ += k * 2.4;
+      }
+      let shakeX = 0, shakeY = 0;
+      if (state.camShake > 0) {
+        state.camShake = Math.max(0, state.camShake - dt * 1.8);
+        shakeX = (Math.random() - 0.5) * state.camShake * 0.65;
+        shakeY = (Math.random() - 0.5) * state.camShake * 0.45;
+      }
+      camera.position.x = THREE.MathUtils.lerp(camera.position.x, desiredCamX, dt * 7.5) + shakeX;
+      camera.position.y = THREE.MathUtils.lerp(camera.position.y, desiredCamY, dt * 7.5) + shakeY;
+      camera.position.z = THREE.MathUtils.lerp(camera.position.z, desiredCamZ, dt * 7.5);
       camera.lookAt(p.pos.x * 0.35, 1.15, p.pos.z - 9.0);
 
       // 6) UPDATE 3D FLOATING OPPONENT HEALTH BAR (STRICTLY CLAMPED INSIDE VIEWPORT)
@@ -5467,6 +6197,9 @@
     // =========================================================================
     // Home Screen: "開始遊戲" & "遊戲規則"
     document.getElementById('btn-start-game').addEventListener('click', () => {
+      if (state.isTransitioning) return;
+      state.isTransitioning = true;
+      setTimeout(() => { state.isTransitioning = false; }, 350);
       sound.init();
       document.getElementById('home-overlay').classList.add('hidden');
       shuffleStages();
@@ -5535,6 +6268,9 @@
 
     // Result Modal Next / Retry / Home Buttons
     document.getElementById('btn-stage-next').addEventListener('click', (e) => {
+      if (state.isTransitioning) return;
+      state.isTransitioning = true;
+      setTimeout(() => { state.isTransitioning = false; }, 350);
       const action = e.currentTarget.dataset.action;
       document.getElementById('result-modal').classList.add('hidden');
       document.getElementById('result-modal').classList.remove('flex');
@@ -5622,26 +6358,55 @@
     }
 
     function releasePlayerCharge() {
+      const ringEl = document.getElementById('throw-charge-ring');
+      if (ringEl) ringEl.style.strokeDashoffset = '289';
       if (!state.player.charging) return;
       state.player.charging = false;
       document.getElementById('charge-meter-wrap').style.opacity = '0';
       if (state.phase === 'PLAYING') {
-        fireProjectile(true, state.player.chargePower);
+        // Quick tap delivers crisp min-power throw; hold delivers high-velocity power throw
+        fireProjectile(true, Math.max(0.18, state.player.chargePower));
       }
       state.player.chargePower = 0;
     }
 
+    // Strict Multitouch Isolation: Left Thumbstick & Right「丟躑」Track Independent pointerIds!
     throwBtn.addEventListener('pointerdown', (e) => {
       e.preventDefault();
-      throwBtn.setPointerCapture(e.pointerId);
+      if (state.throwPtr.active) return;
+      state.throwPtr.active = true;
+      state.throwPtr.id = e.pointerId;
+      try { throwBtn.setPointerCapture(e.pointerId); } catch (_) {}
       startPlayerCharge();
     });
     throwBtn.addEventListener('pointerup', (e) => {
       e.preventDefault();
+      if (state.throwPtr.id !== e.pointerId) return;
+      state.throwPtr.active = false;
+      state.throwPtr.id = null;
       releasePlayerCharge();
     });
-    throwBtn.addEventListener('pointercancel', () => {
+    throwBtn.addEventListener('pointercancel', (e) => {
+      if (state.throwPtr.id !== e.pointerId) return;
+      state.throwPtr.active = false;
+      state.throwPtr.id = null;
       releasePlayerCharge();
+    });
+
+    // Safe Input & Audio Lifecycle Handling on iOS Safari App Switch / Blur
+    window.addEventListener('blur', () => {
+      resetJoystick();
+      state.throwPtr.active = false;
+      state.throwPtr.id = null;
+      if (state.player.charging) releasePlayerCharge();
+      state.keys.w = state.keys.a = state.keys.s = state.keys.d = state.keys.space = false;
+    });
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        sound.stopBGM();
+      } else if (state.bgmEnabled && state.phase === 'PLAYING') {
+        sound.startBGM();
+      }
     });
 
     // Keyboard Controls (WASD / Arrows + Spacebar)
